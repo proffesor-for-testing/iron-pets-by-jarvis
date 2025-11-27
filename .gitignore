@@ -109,3 +109,4 @@ temp/
 *.key
 secrets/
 credentials/
+agentdb.db

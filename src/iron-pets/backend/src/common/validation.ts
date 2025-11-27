@@ -76,7 +76,7 @@ export function validateRequest<T>(
   schema: ZodSchema<T>,
   target: ValidationTarget = 'body'
 ) {
-  return (req: Request, res: Response, next: NextFunction): void => {
+  return (req: Request, _res: Response, next: NextFunction): void => {
     try {
       const dataToValidate = req[target];
       const validated = schema.parse(dataToValidate);

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import { AppError } from '@common/errors';
-import { appConfig } from '@config/index';
+import { AppError } from '../common/errors';
+import { appConfig } from '../config/index';
 import { Prisma } from '@prisma/client';
 
 /**
@@ -11,7 +11,7 @@ export function errorHandler(
   error: Error,
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ): void {
   // Log error for debugging
   console.error('Error:', {
@@ -180,7 +180,7 @@ function handlePrismaError(error: Prisma.PrismaClientKnownRequestError): {
 export function notFoundHandler(
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ): void {
   res.status(404).json({
     success: false,

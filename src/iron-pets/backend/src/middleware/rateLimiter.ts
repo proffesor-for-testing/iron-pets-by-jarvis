@@ -1,5 +1,5 @@
 import rateLimit, { RateLimitRequestHandler } from 'express-rate-limit';
-import { appConfig } from '@config/index';
+import { appConfig } from '../config/index';
 
 /**
  * Default rate limiter configuration

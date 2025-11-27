@@ -14,14 +14,13 @@ services:
       - '${DB_PORT:-5432}:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./backend/prisma/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U ${DB_USER:-ironpets} -d ${DB_NAME:-iron_pets}']
       interval: 10s
       timeout: 5s
       retries: 5
 
-  # Redis Cache
+  # Redis Cache (optional - for future use)
   redis:
     image: redis:7-alpine
     container_name: iron-pets-redis
@@ -45,15 +44,21 @@ services:
     container_name: iron-pets-api
     restart: unless-stopped
     environment:
-      NODE_ENV: ${NODE_ENV:-development}
+      NODE_ENV: ${NODE_ENV:-production}
       PORT: 3001
       DATABASE_URL: postgresql://${DB_USER:-ironpets}:${DB_PASSWORD:-ironpets_secret}@postgres:5432/${DB_NAME:-iron_pets}?schema=public
       REDIS_URL: redis://:${REDIS_PASSWORD:-ironpets_redis}@redis:6379
-      JWT_SECRET: ${JWT_SECRET:-change-this-in-production}
-      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change-this-refresh-secret}
-      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
-      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      JWT_SECRET: ${JWT_SECRET:-dev-jwt-secret-change-in-production-min32chars}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev-refresh-secret-change-in-production-min32}
+      SESSION_SECRET: ${SESSION_SECRET:-dev-session-secret-change-in-production32}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:3000}
+      USE_MOCK_SERVICES: ${USE_MOCK_SERVICES:-true}
+      # External services (optional - uses mock by default)
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY:-}
+      SENDGRID_FROM_EMAIL: ${SENDGRID_FROM_EMAIL:-noreply@ironpets.local}
     ports:
       - '${API_PORT:-3001}:3001'
     depends_on:
@@ -62,38 +67,51 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:3001/health']
+      test: ['CMD', 'wget', '-q', '--spider', 'http://localhost:3001/health']
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 40s
 
   # Frontend Next.js App
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3001/api}
+        - NEXT_PUBLIC_DEMO_MODE=${NEXT_PUBLIC_DEMO_MODE:-false}
     container_name: iron-pets-web
     restart: unless-stopped
     environment:
-      NODE_ENV: ${NODE_ENV:-development}
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001/api/v1}
-      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}
+      NODE_ENV: ${NODE_ENV:-production}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001/api}
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:-}
+      NEXT_PUBLIC_DEMO_MODE: ${NEXT_PUBLIC_DEMO_MODE:-false}
     ports:
       - '${WEB_PORT:-3000}:3000'
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
 
-  # Stripe CLI (for webhook testing in development)
-  stripe-cli:
-    image: stripe/stripe-cli:latest
-    container_name: iron-pets-stripe
-    command: listen --forward-to backend:3001/api/v1/checkout/webhook
+  # Database seeder (runs once on first startup)
+  db-seed:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: iron-pets-db-seed
     environment:
-      STRIPE_API_KEY: ${STRIPE_SECRET_KEY}
+      DATABASE_URL: postgresql://${DB_USER:-ironpets}:${DB_PASSWORD:-ironpets_secret}@postgres:5432/${DB_NAME:-iron_pets}?schema=public
+    command: >
+      sh -c "
+        npx prisma migrate deploy &&
+        npx prisma db seed || echo 'Seed already applied or failed'
+      "
     depends_on:
-      - backend
+      postgres:
+        condition: service_healthy
     profiles:
-      - dev
+      - seed
 
 volumes:
   postgres_data:

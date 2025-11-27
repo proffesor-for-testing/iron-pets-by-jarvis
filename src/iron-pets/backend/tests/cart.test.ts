@@ -48,6 +48,10 @@ describe('Cart Module - TDD London School', () => {
     // Setup mock request/response
     mockRequest = {
       sessionID: 'test-session-123',
+      sessionId: 'test-session-123',  // Custom property from Express.d.ts
+      headers: {
+        'x-session-id': 'test-session-123',
+      },
       user: undefined,
       params: {},
       body: {},

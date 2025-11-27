@@ -149,7 +149,7 @@ export class CartService {
           cartId: cart.id,
           productId,
           quantity,
-          price: product.price,
+          priceAtAdd: product.price,
         },
       });
     }
@@ -351,7 +351,7 @@ export class CartService {
               cartId: userCart.id,
               productId: guestItem.productId,
               quantity: guestItem.quantity,
-              price: guestItem.price,
+              priceAtAdd: guestItem.priceAtAdd,
             },
           });
         }
@@ -397,7 +397,7 @@ export class CartService {
       return false;
     }
 
-    return product.stock >= quantity;
+    return product.stockQuantity >= quantity;
   }
 
   /**

@@ -5,7 +5,7 @@
  * @module checkout.service
  */
 
-import { SHIPPING_OPTIONS, ShippingOption, ShippingAddress } from '../../types/domain.types';
+import { SHIPPING_OPTIONS } from '../../types/domain.types';
 import {
   ShippingRatesRequest,
   ShippingRatesResponse,
@@ -16,7 +16,7 @@ import {
   ConfirmOrderRequest,
   ApplyPromoRequest,
   ApplyPromoResponse,
-  StockIssue,
+  ShippingOption as ApiShippingOption,
   ErrorCode,
 } from '../../types/api.types';
 
@@ -34,18 +34,18 @@ export class CheckoutService {
    * REQ-CHK-003: Shipping Method Selection
    */
   async getShippingRates(
-    request: ShippingRatesRequest,
+    _request: ShippingRatesRequest,
     userId?: string
   ): Promise<ShippingRatesResponse> {
     // Get current cart
     const cart = await this.cartService.getCart(userId);
 
     // Calculate shipping options based on cart subtotal
-    const options: ShippingOption[] = SHIPPING_OPTIONS.map(option => {
-      const isFree = option.freeThreshold && cart.subtotal >= option.freeThreshold;
+    const options: ApiShippingOption[] = SHIPPING_OPTIONS.map(option => {
+      const isFree = !!(option.freeThreshold && cart.subtotal >= option.freeThreshold);
 
       return {
-        id: option.id,
+        id: option.id as 'standard' | 'expedited',
         name: option.name,
         description: option.description,
         price: isFree ? 0 : option.price,
@@ -65,7 +65,7 @@ export class CheckoutService {
    * REQ-CHK-001: Checkout Initiation
    */
   async validateCheckout(
-    request: ValidateCheckoutRequest,
+    _request: ValidateCheckoutRequest,
     userId?: string
   ): Promise<ValidateCheckoutResponse> {
     // Get current cart
@@ -271,7 +271,7 @@ export class CheckoutService {
     const order = await this.orderService.createOrder({
       orderNumber,
       userId: userId || null,
-      email: userEmail || request.shippingAddress.email,
+      email: userEmail || (request as any).email || 'guest@example.com',
       status: 'pending',
       subtotal: cart.subtotal,
       shippingAmount: shippingCost,

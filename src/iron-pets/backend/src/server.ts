@@ -1,6 +1,6 @@
 import { app } from './app';
-import { appConfig } from '@config/index';
-import { DatabaseService } from '@config/database';
+import { appConfig } from './config/index';
+import { DatabaseService } from './config/database';
 
 /**
  * Server startup function

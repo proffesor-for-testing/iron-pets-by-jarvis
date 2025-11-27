@@ -6,15 +6,18 @@
 
 import type { Request, Response } from 'express';
 import { CatalogService } from './catalog.service';
-import type { PrismaClient } from '@prisma/client';
-import type { SearchClient } from 'algoliasearch';
+
+// Optional Algolia client type for search functionality
+interface AlgoliaClient {
+  initIndex(indexName: string): any;
+}
 
 export class CatalogController {
   private catalogService: CatalogService;
-  private algoliaClient: SearchClient;
+  private algoliaClient?: AlgoliaClient;
 
-  constructor(prismaClient: PrismaClient, algoliaClient: SearchClient) {
-    this.catalogService = new CatalogService(prismaClient);
+  constructor(catalogService: CatalogService, algoliaClient?: AlgoliaClient) {
+    this.catalogService = catalogService;
     this.algoliaClient = algoliaClient;
   }
 
@@ -22,7 +25,7 @@ export class CatalogController {
    * GET /categories - Hierarchical category tree
    * REQ-CAT-001: Hierarchical categories
    */
-  async getCategories(req: Request, res: Response): Promise<void> {
+  async getCategories(_req: Request, res: Response): Promise<void> {
     try {
       const categories = await this.catalogService.getAllCategories();
       const tree = this.catalogService.buildCategoryTree(categories);
@@ -78,7 +81,7 @@ export class CatalogController {
   /**
    * GET /brands - All brands with product count
    */
-  async getBrands(req: Request, res: Response): Promise<void> {
+  async getBrands(_req: Request, res: Response): Promise<void> {
     try {
       const brands = await this.catalogService.getAllBrands();
 
@@ -171,7 +174,7 @@ export class CatalogController {
       }
 
       const relatedProducts = await this.catalogService.getRelatedProducts(product);
-      const stockStatus = this.catalogService.calculateStockStatus(product.stock);
+      const stockStatus = this.catalogService.calculateStockStatus(product.stockQuantity);
 
       res.json({
         success: true,
@@ -196,6 +199,17 @@ export class CatalogController {
   async searchProducts(req: Request, res: Response): Promise<void> {
     try {
       const { q, category, brand, minPrice, maxPrice, page = 1 } = req.query as any;
+
+      if (!this.algoliaClient) {
+        // Fallback to database search when Algolia is not configured
+        const result = await this.catalogService.getProducts(req.query as any);
+        res.json({
+          success: true,
+          data: result.products,
+          pagination: result.pagination,
+        });
+        return;
+      }
 
       const index = this.algoliaClient.initIndex('products');
 

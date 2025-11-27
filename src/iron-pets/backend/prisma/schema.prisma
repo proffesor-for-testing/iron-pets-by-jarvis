@@ -4,7 +4,8 @@
 // Generator: Prisma Client
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
 }
 
 datasource db {
@@ -51,23 +52,30 @@ enum DiscountType {
 // ============================================
 
 model User {
-  id                String      @id @default(uuid()) @db.Uuid
-  email             String      @unique @db.VarChar(255)
-  passwordHash      String      @map("password_hash") @db.VarChar(255)
-  emailVerified     Boolean     @default(false) @map("email_verified")
-  emailVerifiedAt   DateTime?   @map("email_verified_at") @db.Timestamptz
-  createdAt         DateTime    @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt         DateTime    @updatedAt @map("updated_at") @db.Timestamptz
+  id                        String      @id @default(uuid()) @db.Uuid
+  email                     String      @unique @db.VarChar(255)
+  passwordHash              String      @map("password_hash") @db.VarChar(255)
+  emailVerified             Boolean     @default(false) @map("email_verified")
+  emailVerifiedAt           DateTime?   @map("email_verified_at") @db.Timestamptz
+  emailVerificationToken    String?     @map("email_verification_token") @db.VarChar(255)
+  emailVerificationExpiry   DateTime?   @map("email_verification_expiry") @db.Timestamptz
+  failedLoginAttempts       Int         @default(0) @map("failed_login_attempts")
+  accountLockedUntil        DateTime?   @map("account_locked_until") @db.Timestamptz
+  createdAt                 DateTime    @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt                 DateTime    @updatedAt @map("updated_at") @db.Timestamptz
 
   // Relations
-  profile           UserProfile?
-  addresses         Address[]
-  pets              Pet[]
-  carts             Cart[]
-  orders            Order[]
+  profile              UserProfile?
+  addresses            Address[]
+  pets                 Pet[]
+  carts                Cart[]
+  orders               Order[]
+  refreshTokens        RefreshToken[]
+  passwordResetTokens  PasswordResetToken[]
 
   @@index([email])
   @@index([emailVerified])
+  @@index([emailVerificationToken])
   @@map("users")
 }
 
@@ -365,4 +373,40 @@ model PromoCode {
   @@index([isActive])
   @@index([expiresAt])
   @@map("promo_codes")
+}
+
+// ============================================
+// AUTHENTICATION TOKENS
+// ============================================
+
+model RefreshToken {
+  id          String   @id @default(uuid()) @db.Uuid
+  token       String   @unique @db.VarChar(255)
+  userId      String   @map("user_id") @db.Uuid
+  expiresAt   DateTime @map("expires_at") @db.Timestamptz
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
+}
+
+model PasswordResetToken {
+  id          String   @id @default(uuid()) @db.Uuid
+  token       String   @unique @db.VarChar(255)
+  userId      String   @map("user_id") @db.Uuid
+  expiresAt   DateTime @map("expires_at") @db.Timestamptz
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("password_reset_tokens")
 }

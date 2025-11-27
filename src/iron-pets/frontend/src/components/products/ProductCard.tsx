@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/Badge';
 
 interface ProductCardProps {
   id: string;
+  slug?: string;
   name: string;
   price: number;
   originalPrice?: number;
@@ -21,6 +22,7 @@ interface ProductCardProps {
 
 export function ProductCard({
   id,
+  slug,
   name,
   price,
   originalPrice,
@@ -31,6 +33,7 @@ export function ProductCard({
   isOnSale = false,
   onAddToCart,
 }: ProductCardProps) {
+  const productUrl = `/products/${slug || id}`;
   const discount = originalPrice ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0;
 
   return (
@@ -50,7 +53,7 @@ export function ProductCard({
       </div>
 
       {/* Product Image */}
-      <Link href={`/products/${id}`} className="block">
+      <Link href={productUrl} className="block">
         <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-100">
           <Image
             src={image}
@@ -64,7 +67,7 @@ export function ProductCard({
 
       {/* Product Info */}
       <div className="mt-4 space-y-2">
-        <Link href={`/products/${id}`}>
+        <Link href={productUrl}>
           <h3 className="line-clamp-2 text-sm font-medium text-gray-900 hover:text-primary transition-colors">
             {name}
           </h3>

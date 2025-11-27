@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 export interface CartItem {
   id: string;
@@ -158,9 +158,21 @@ export const useCartStore = create<CartState>()(
     }),
     {
       name: 'iron-pets-cart',
+      storage: createJSONStorage(() => {
+        // Return a no-op storage during SSR
+        if (typeof window === 'undefined') {
+          return {
+            getItem: () => null,
+            setItem: () => {},
+            removeItem: () => {},
+          };
+        }
+        return localStorage;
+      }),
       partialize: (state) => ({
         items: state.items,
       }),
+      skipHydration: true,
     }
   )
 );

@@ -13,13 +13,13 @@ interface ApiError extends Error {
 
 export const errorHandler = (
   error: ApiError | ZodError,
-  req: Request,
+  _req: Request,
   res: Response,
-  next: NextFunction
-) => {
+  _next: NextFunction
+): void => {
   // Handle Zod validation errors
   if (error instanceof ZodError) {
-    return res.status(400).json({
+    res.status(400).json({
       success: false,
       error: 'Validation error',
       details: error.errors.map((e) => ({
@@ -27,6 +27,7 @@ export const errorHandler = (
         message: e.message,
       })),
     });
+    return;
   }
 
   // Handle known errors

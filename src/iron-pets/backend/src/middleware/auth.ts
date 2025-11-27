@@ -1,15 +1,16 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-import { appConfig } from '@config/index';
-import { UnauthorizedError, ForbiddenError } from '@common/errors';
+import jwt, { SignOptions } from 'jsonwebtoken';
+import { appConfig } from '../config/index';
+import { UnauthorizedError, ForbiddenError } from '../common/errors';
 
 /**
  * JWT Payload Interface
  */
 export interface JwtPayload {
+  id: string;           // Alias for backwards compatibility
   userId: string;
   email: string;
-  role: string;
+  role?: string;
   iat?: number;
   exp?: number;
 }
@@ -27,7 +28,7 @@ export interface AuthenticatedRequest extends Request {
  */
 export function authenticate(
   req: AuthenticatedRequest,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ): void {
   try {
@@ -73,7 +74,7 @@ export function authenticate(
  */
 export function optionalAuth(
   req: AuthenticatedRequest,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ): void {
   try {
@@ -107,14 +108,14 @@ export function optionalAuth(
 export function authorize(...allowedRoles: string[]) {
   return (
     req: AuthenticatedRequest,
-    res: Response,
+    _res: Response,
     next: NextFunction
   ): void => {
     if (!req.user) {
       return next(new UnauthorizedError('Not authenticated', 'NOT_AUTHENTICATED'));
     }
 
-    if (!allowedRoles.includes(req.user.role)) {
+    if (!req.user.role || !allowedRoles.includes(req.user.role)) {
       return next(
         new ForbiddenError(
           'Insufficient permissions',
@@ -135,26 +136,18 @@ export class TokenGenerator {
    * Generate access token
    */
   static generateAccessToken(payload: Omit<JwtPayload, 'iat' | 'exp'>): string {
-    return jwt.sign(
-      payload,
-      appConfig.auth.jwt.secret,
-      {
-        expiresIn: appConfig.auth.jwt.expiresIn,
-      }
-    );
+    return jwt.sign(payload, appConfig.auth.jwt.secret, {
+      expiresIn: appConfig.auth.jwt.expiresIn,
+    } as SignOptions);
   }
 
   /**
    * Generate refresh token
    */
   static generateRefreshToken(payload: Omit<JwtPayload, 'iat' | 'exp'>): string {
-    return jwt.sign(
-      payload,
-      appConfig.auth.jwt.refreshSecret,
-      {
-        expiresIn: appConfig.auth.jwt.refreshExpiresIn,
-      }
-    );
+    return jwt.sign(payload, appConfig.auth.jwt.refreshSecret, {
+      expiresIn: appConfig.auth.jwt.refreshExpiresIn,
+    } as SignOptions);
   }
 
   /**
@@ -201,3 +194,8 @@ export function isAdmin(req: AuthenticatedRequest): boolean {
 export function isOwner(req: AuthenticatedRequest, ownerId: string): boolean {
   return req.user?.userId === ownerId || isAdmin(req);
 }
+
+/**
+ * Alias for optionalAuth for backwards compatibility
+ */
+export const authenticateOptional = optionalAuth;
