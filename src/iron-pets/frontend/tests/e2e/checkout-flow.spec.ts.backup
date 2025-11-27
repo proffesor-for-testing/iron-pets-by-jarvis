@@ -1,0 +1,346 @@
+/**
+ * E2E Test: Complete Checkout Flow
+ * Tests the entire user journey from adding products to cart through order completion
+ * This is the MOST CRITICAL user flow for e-commerce
+ */
+
+import { test, expect } from '@playwright/test';
+
+test.describe('Checkout Flow - Critical E-commerce Path', () => {
+  test.beforeEach(async ({ page }) => {
+    // Navigate to homepage
+    await page.goto('/');
+
+    // Wait for page to be fully loaded
+    await page.waitForLoadState('networkidle');
+  });
+
+  test('should complete full checkout flow as guest user', async ({ page }) => {
+    // STEP 1: Browse products
+    await test.step('Browse and select product', async () => {
+      // Navigate to dog food category
+      await page.getByRole('link', { name: /dog food/i }).click();
+      await expect(page).toHaveURL(/\/categories\/dog-food/);
+
+      // Wait for products to load
+      await page.waitForSelector('[data-testid="product-card"]');
+
+      // Select first product
+      await page.getByRole('link', { name: /premium dog food/i }).first().click();
+      await expect(page).toHaveURL(/\/products\//);
+    });
+
+    // STEP 2: Add to cart
+    await test.step('Add product to cart', async () => {
+      // Verify product details page
+      await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+      await expect(page.getByText(/\$[\d.]+/)).toBeVisible();
+
+      // Add to cart
+      await page.getByRole('button', { name: /add to cart/i }).click();
+
+      // Verify success message
+      await expect(page.getByText(/added to cart/i)).toBeVisible();
+
+      // Verify cart badge updates
+      const cartBadge = page.locator('[data-testid="cart-badge"]');
+      await expect(cartBadge).toHaveText('1');
+    });
+
+    // STEP 3: Review cart
+    await test.step('Navigate to cart and review items', async () => {
+      await page.getByRole('link', { name: /cart/i }).click();
+      await expect(page).toHaveURL(/\/cart/);
+
+      // Verify product in cart
+      await expect(page.getByText(/premium dog food/i)).toBeVisible();
+      await expect(page.getByText(/\$[\d.]+/)).toBeVisible();
+
+      // Verify cart total
+      await expect(page.getByText(/subtotal/i)).toBeVisible();
+      await expect(page.getByText(/total/i)).toBeVisible();
+
+      // Proceed to checkout
+      await page.getByRole('button', { name: /proceed to checkout/i }).click();
+    });
+
+    // STEP 4: Guest checkout - Shipping information
+    await test.step('Enter shipping information', async () => {
+      await expect(page).toHaveURL(/\/checkout/);
+
+      // Select guest checkout
+      await page.getByRole('button', { name: /continue as guest/i }).click();
+
+      // Fill in shipping address
+      await page.getByLabel(/first name/i).fill('John');
+      await page.getByLabel(/last name/i).fill('Doe');
+      await page.getByLabel(/email/i).fill('john.doe@example.com');
+      await page.getByLabel(/phone/i).fill('555-123-4567');
+      await page.getByLabel(/address/i).fill('123 Main St');
+      await page.getByLabel(/city/i).fill('New York');
+      await page.getByLabel(/state/i).selectOption('NY');
+      await page.getByLabel(/zip code/i).fill('10001');
+
+      // Continue to shipping method
+      await page.getByRole('button', { name: /continue/i }).click();
+    });
+
+    // STEP 5: Select shipping method
+    await test.step('Select shipping method', async () => {
+      // Verify shipping options are displayed
+      await expect(page.getByText(/standard shipping/i)).toBeVisible();
+      await expect(page.getByText(/expedited shipping/i)).toBeVisible();
+
+      // Select standard shipping (default)
+      await page.getByRole('radio', { name: /standard shipping/i }).check();
+
+      // Verify shipping cost is displayed
+      await expect(page.getByText(/shipping: \$[\d.]+/i)).toBeVisible();
+
+      // Continue to payment
+      await page.getByRole('button', { name: /continue/i }).click();
+    });
+
+    // STEP 6: Enter payment information (using Stripe test card)
+    await test.step('Enter payment information', async () => {
+      // Wait for Stripe iframe to load
+      const stripeIframe = page.frameLocator('[title*="Secure payment"]').first();
+
+      // Fill in test card details
+      await stripeIframe.getByPlaceholder(/card number/i).fill('4242424242424242');
+      await stripeIframe.getByPlaceholder(/mm \/ yy/i).fill('12/25');
+      await stripeIframe.getByPlaceholder(/cvc/i).fill('123');
+      await stripeIframe.getByPlaceholder(/zip/i).fill('10001');
+
+      // Verify order total
+      await expect(page.getByText(/order total/i)).toBeVisible();
+      await expect(page.getByTestId('order-total')).toContainText(/\$[\d.]+/);
+
+      // Continue to review
+      await page.getByRole('button', { name: /continue/i }).click();
+    });
+
+    // STEP 7: Review and place order
+    await test.step('Review order and complete purchase', async () => {
+      // Verify order summary
+      await expect(page.getByText(/order summary/i)).toBeVisible();
+      await expect(page.getByText(/premium dog food/i)).toBeVisible();
+
+      // Verify shipping address
+      await expect(page.getByText(/123 Main St/i)).toBeVisible();
+      await expect(page.getByText(/New York, NY 10001/i)).toBeVisible();
+
+      // Verify payment method (last 4 digits)
+      await expect(page.getByText(/ending in 4242/i)).toBeVisible();
+
+      // Accept terms and conditions
+      await page.getByLabel(/i agree to the terms/i).check();
+
+      // Place order
+      await page.getByRole('button', { name: /place order/i }).click();
+
+      // Wait for order processing
+      await page.waitForURL(/\/checkout\/confirmation/);
+    });
+
+    // STEP 8: Verify order confirmation
+    await test.step('Verify order confirmation', async () => {
+      // Verify success message
+      await expect(page.getByRole('heading', { name: /order confirmed/i })).toBeVisible();
+      await expect(page.getByText(/thank you for your order/i)).toBeVisible();
+
+      // Verify order number
+      const orderNumber = await page.getByTestId('order-number').textContent();
+      expect(orderNumber).toMatch(/^ORD-\d+$/);
+
+      // Verify order details
+      await expect(page.getByText(/premium dog food/i)).toBeVisible();
+      await expect(page.getByText(/123 Main St/i)).toBeVisible();
+
+      // Verify email confirmation message
+      await expect(page.getByText(/confirmation email sent to john.doe@example.com/i)).toBeVisible();
+
+      // Verify next steps
+      await expect(page.getByText(/track your order/i)).toBeVisible();
+    });
+
+    // STEP 9: Optional - Navigate to order tracking
+    await test.step('Navigate to order tracking', async () => {
+      await page.getByRole('link', { name: /track order/i }).click();
+
+      // Should show order status
+      await expect(page.getByText(/order status/i)).toBeVisible();
+      await expect(page.getByText(/processing/i)).toBeVisible();
+    });
+  });
+
+  test('should handle checkout errors gracefully', async ({ page }) => {
+    await test.step('Navigate to checkout with empty cart', async () => {
+      await page.goto('/checkout');
+
+      // Should redirect to cart page
+      await expect(page).toHaveURL(/\/cart/);
+      await expect(page.getByText(/your cart is empty/i)).toBeVisible();
+    });
+
+    await test.step('Handle payment card errors', async ({ page: testPage }) => {
+      // Add product and navigate to payment
+      await testPage.goto('/products/premium-dog-food');
+      await testPage.getByRole('button', { name: /add to cart/i }).click();
+      await testPage.goto('/checkout');
+
+      // Fill shipping info
+      await testPage.getByLabel(/email/i).fill('test@example.com');
+      // ... (fill other required fields)
+      await testPage.getByRole('button', { name: /continue/i }).click();
+
+      // Use declined test card
+      const stripeIframe = testPage.frameLocator('[title*="Secure payment"]').first();
+      await stripeIframe.getByPlaceholder(/card number/i).fill('4000000000000002');
+      await stripeIframe.getByPlaceholder(/mm \/ yy/i).fill('12/25');
+      await stripeIframe.getByPlaceholder(/cvc/i).fill('123');
+
+      await testPage.getByRole('button', { name: /place order/i }).click();
+
+      // Should show error message
+      await expect(testPage.getByText(/payment declined/i)).toBeVisible();
+    });
+  });
+
+  test('should save cart state across page refreshes', async ({ page, context }) => {
+    await test.step('Add items to cart', async () => {
+      await page.goto('/products/premium-dog-food');
+      await page.getByRole('button', { name: /add to cart/i }).click();
+
+      // Verify cart badge
+      const cartBadge = page.locator('[data-testid="cart-badge"]');
+      await expect(cartBadge).toHaveText('1');
+    });
+
+    await test.step('Refresh page and verify cart persists', async () => {
+      await page.reload();
+      await page.waitForLoadState('networkidle');
+
+      // Cart should still have item
+      const cartBadge = page.locator('[data-testid="cart-badge"]');
+      await expect(cartBadge).toHaveText('1');
+    });
+
+    await test.step('Navigate to different page and back', async () => {
+      await page.goto('/');
+      await page.goto('/cart');
+
+      // Cart should still have item
+      await expect(page.getByText(/premium dog food/i)).toBeVisible();
+    });
+  });
+
+  test('should apply promo code during checkout', async ({ page }) => {
+    // Setup: Add product and go to cart
+    await page.goto('/products/premium-dog-food');
+    await page.getByRole('button', { name: /add to cart/i }).click();
+    await page.goto('/cart');
+
+    await test.step('Apply valid promo code', async () => {
+      // Expand promo code section
+      await page.getByText(/have a promo code/i).click();
+
+      // Enter promo code
+      await page.getByPlaceholder(/promo code/i).fill('WELCOME10');
+      await page.getByRole('button', { name: /apply/i }).click();
+
+      // Verify discount applied
+      await expect(page.getByText(/10% discount/i)).toBeVisible();
+      await expect(page.getByText(/savings: -\$[\d.]+/i)).toBeVisible();
+
+      // Verify total reduced
+      const totalBefore = 49.99;
+      const totalAfter = await page.getByTestId('order-total').textContent();
+      expect(parseFloat(totalAfter?.replace(/[^\d.]/g, '') || '0')).toBeLessThan(totalBefore);
+    });
+
+    await test.step('Handle invalid promo code', async ({ page: testPage }) => {
+      await testPage.getByPlaceholder(/promo code/i).fill('INVALID123');
+      await testPage.getByRole('button', { name: /apply/i }).click();
+
+      // Should show error
+      await expect(testPage.getByText(/invalid promo code/i)).toBeVisible();
+    });
+  });
+
+  test('should handle out of stock during checkout', async ({ page }) => {
+    // Mock: Product becomes out of stock during checkout
+    await page.goto('/products/premium-dog-food');
+    await page.getByRole('button', { name: /add to cart/i }).click();
+    await page.goto('/checkout');
+
+    // Simulate stock becoming unavailable
+    await page.route('**/api/checkout/validate', async route => {
+      await route.fulfill({
+        status: 400,
+        body: JSON.stringify({
+          success: false,
+          error: 'Product Premium Dog Food is out of stock',
+        }),
+      });
+    });
+
+    // Fill checkout form and submit
+    await page.getByLabel(/email/i).fill('test@example.com');
+    // ... (fill other fields)
+    await page.getByRole('button', { name: /place order/i }).click();
+
+    // Should show out of stock error
+    await expect(page.getByText(/out of stock/i)).toBeVisible();
+    await expect(page.getByRole('link', { name: /return to cart/i })).toBeVisible();
+  });
+
+  test('should enforce free shipping threshold', async ({ page }) => {
+    await test.step('Add item below threshold', async () => {
+      await page.goto('/products/dog-toy'); // Assume $15 toy
+      await page.getByRole('button', { name: /add to cart/i }).click();
+      await page.goto('/cart');
+
+      // Should show shipping cost
+      await expect(page.getByText(/shipping: \$5\.99/i)).toBeVisible();
+      await expect(page.getByText(/add \$35 for free shipping/i)).toBeVisible();
+    });
+
+    await test.step('Add items above $50 threshold', async () => {
+      // Add more items to reach threshold
+      await page.goto('/products/premium-dog-food'); // $49.99
+      await page.getByRole('button', { name: /add to cart/i }).click();
+      await page.goto('/cart');
+
+      // Should show free shipping
+      await expect(page.getByText(/free shipping/i)).toBeVisible();
+      await expect(page.getByText(/shipping: \$0\.00/i)).toBeVisible();
+    });
+  });
+
+  test('should support multiple payment methods', async ({ page }) => {
+    // Setup: Navigate to payment step
+    await page.goto('/products/premium-dog-food');
+    await page.getByRole('button', { name: /add to cart/i }).click();
+    await page.goto('/checkout');
+
+    // Fill shipping info
+    await page.getByLabel(/email/i).fill('test@example.com');
+    // ... (fill other required fields)
+
+    await test.step('Verify payment method options', async () => {
+      // Should show multiple payment options
+      await expect(page.getByText(/credit card/i)).toBeVisible();
+      await expect(page.getByText(/paypal/i)).toBeVisible();
+      await expect(page.getByRole('button', { name: /apple pay/i })).toBeVisible();
+    });
+
+    await test.step('Select PayPal', async () => {
+      await page.getByRole('radio', { name: /paypal/i }).check();
+      await page.getByRole('button', { name: /continue with paypal/i }).click();
+
+      // Should redirect to PayPal (mock)
+      await expect(page).toHaveURL(/paypal\.com|sandbox\.paypal/);
+    });
+  });
+});

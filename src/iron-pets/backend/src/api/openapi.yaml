@@ -1,0 +1,2181 @@
+openapi: 3.0.3
+info:
+  title: Iron Pets API
+  version: 1.0.0
+  description: |
+    REST API for Iron Pets e-commerce platform - MVP version.
+    Provides endpoints for authentication, product catalog, shopping cart, checkout, orders, and user management.
+  contact:
+    name: Iron Pets Engineering Team
+    email: engineering@ironpets.com
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.ironpets.com/v1
+    description: Production server
+  - url: https://staging-api.ironpets.com/v1
+    description: Staging server
+  - url: http://localhost:3000/api/v1
+    description: Local development server
+
+tags:
+  - name: Auth
+    description: Authentication and authorization endpoints
+  - name: Products
+    description: Product catalog operations
+  - name: Categories
+    description: Category navigation
+  - name: Brands
+    description: Brand information
+  - name: Cart
+    description: Shopping cart management
+  - name: Checkout
+    description: Checkout and payment processing
+  - name: Orders
+    description: Order management and history
+  - name: User
+    description: User profile and settings
+  - name: Pets
+    description: Pet profile management
+
+security:
+  - BearerAuth: []
+
+paths:
+  # ========================================
+  # AUTHENTICATION ENDPOINTS
+  # ========================================
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Create new user account
+      description: Register a new user with email and password
+      operationId: registerUser
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Account created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Email already registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: User login
+      description: Authenticate user and return JWT tokens
+      operationId: loginUser
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Invalid credentials or account locked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: User logout
+      description: Invalidate refresh token and end session
+      operationId: logoutUser
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /auth/forgot-password:
+    post:
+      tags: [Auth]
+      summary: Request password reset
+      description: Send password reset email to user
+      operationId: forgotPassword
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordRequest'
+      responses:
+        '200':
+          description: Reset email sent if account exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /auth/reset-password:
+    post:
+      tags: [Auth]
+      summary: Reset password with token
+      description: Reset user password using reset token from email
+      operationId: resetPassword
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+      responses:
+        '200':
+          description: Password reset successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Invalid or expired token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Refresh access token
+      description: Get new access token using refresh token
+      operationId: refreshToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshTokenResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/verify/{token}:
+    get:
+      tags: [Auth]
+      summary: Verify email address
+      description: Verify user email with verification token
+      operationId: verifyEmail
+      security: []
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Email verified successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Invalid or expired token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ========================================
+  # PRODUCT ENDPOINTS
+  # ========================================
+  /products:
+    get:
+      tags: [Products]
+      summary: List products
+      description: Get paginated list of products with optional filtering
+      operationId: listProducts
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: categoryId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: brandId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: minPrice
+          in: query
+          schema:
+            type: number
+        - name: maxPrice
+          in: query
+          schema:
+            type: number
+        - name: inStockOnly
+          in: query
+          schema:
+            type: boolean
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+            enum: [relevance, price_asc, price_desc, rating, newest]
+            default: relevance
+      responses:
+        '200':
+          description: Products retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductListResponse'
+
+  /products/search:
+    get:
+      tags: [Products]
+      summary: Search products
+      description: Full-text search with autocomplete and filters
+      operationId: searchProducts
+      security: []
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 2
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: brands
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+        - name: minRating
+          in: query
+          schema:
+            type: number
+            minimum: 1
+            maximum: 5
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+            enum: [relevance, price_asc, price_desc, rating]
+      responses:
+        '200':
+          description: Search results retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductListResponse'
+
+  /products/{slug}:
+    get:
+      tags: [Products]
+      summary: Get product by slug
+      description: Retrieve detailed product information
+      operationId: getProduct
+      security: []
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Product retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDetailResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ========================================
+  # CATEGORY ENDPOINTS
+  # ========================================
+  /categories:
+    get:
+      tags: [Categories]
+      summary: List categories
+      description: Get all product categories with hierarchy
+      operationId: listCategories
+      security: []
+      responses:
+        '200':
+          description: Categories retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryListResponse'
+
+  /categories/{slug}:
+    get:
+      tags: [Categories]
+      summary: Get category by slug
+      description: Get category details with products
+      operationId: getCategory
+      security: []
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Category retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryDetailResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ========================================
+  # BRAND ENDPOINTS
+  # ========================================
+  /brands:
+    get:
+      tags: [Brands]
+      summary: List brands
+      description: Get all active brands
+      operationId: listBrands
+      security: []
+      responses:
+        '200':
+          description: Brands retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrandListResponse'
+
+  /brands/{slug}:
+    get:
+      tags: [Brands]
+      summary: Get brand by slug
+      description: Get brand details with products
+      operationId: getBrand
+      security: []
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Brand retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrandDetailResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ========================================
+  # CART ENDPOINTS
+  # ========================================
+  /cart:
+    get:
+      tags: [Cart]
+      summary: Get current cart
+      description: Retrieve current user or guest cart
+      operationId: getCart
+      security: []
+      responses:
+        '200':
+          description: Cart retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartResponse'
+
+    delete:
+      tags: [Cart]
+      summary: Clear cart
+      description: Remove all items from cart
+      operationId: clearCart
+      security: []
+      responses:
+        '200':
+          description: Cart cleared successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /cart/items:
+    post:
+      tags: [Cart]
+      summary: Add item to cart
+      description: Add product to cart or update quantity if already exists
+      operationId: addToCart
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddToCartRequest'
+      responses:
+        '200':
+          description: Item added to cart
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartResponse'
+        '400':
+          description: Invalid quantity or insufficient stock
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /cart/items/{id}:
+    put:
+      tags: [Cart]
+      summary: Update cart item
+      description: Update quantity of cart item
+      operationId: updateCartItem
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCartItemRequest'
+      responses:
+        '200':
+          description: Cart item updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags: [Cart]
+      summary: Remove cart item
+      description: Remove item from cart
+      operationId: removeCartItem
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Item removed from cart
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartResponse'
+
+  /cart/merge:
+    post:
+      tags: [Cart]
+      summary: Merge guest cart with user cart
+      description: Merge guest cart items into authenticated user cart on login
+      operationId: mergeCart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MergeCartRequest'
+      responses:
+        '200':
+          description: Carts merged successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartResponse'
+
+  # ========================================
+  # CHECKOUT ENDPOINTS
+  # ========================================
+  /checkout/shipping-rates:
+    post:
+      tags: [Checkout]
+      summary: Get shipping rates
+      description: Calculate available shipping rates for cart and address
+      operationId: getShippingRates
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShippingRatesRequest'
+      responses:
+        '200':
+          description: Shipping rates calculated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShippingRatesResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /checkout/validate:
+    post:
+      tags: [Checkout]
+      summary: Validate checkout
+      description: Validate cart items, stock, and address before payment
+      operationId: validateCheckout
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ValidateCheckoutRequest'
+      responses:
+        '200':
+          description: Checkout validation passed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidateCheckoutResponse'
+        '400':
+          description: Validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /checkout/create-payment:
+    post:
+      tags: [Checkout]
+      summary: Create payment intent
+      description: Create Stripe payment intent for order
+      operationId: createPaymentIntent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePaymentRequest'
+      responses:
+        '200':
+          description: Payment intent created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatePaymentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /checkout/confirm:
+    post:
+      tags: [Checkout]
+      summary: Confirm order
+      description: Confirm payment and create order
+      operationId: confirmOrder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmOrderRequest'
+      responses:
+        '201':
+          description: Order created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '400':
+          description: Payment failed or validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /checkout/apply-promo:
+    post:
+      tags: [Checkout]
+      summary: Apply promo code
+      description: Validate and apply promotional code to cart
+      operationId: applyPromoCode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplyPromoRequest'
+      responses:
+        '200':
+          description: Promo code applied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplyPromoResponse'
+        '400':
+          description: Invalid or expired promo code
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ========================================
+  # ORDER ENDPOINTS
+  # ========================================
+  /orders:
+    get:
+      tags: [Orders]
+      summary: List user orders
+      description: Get paginated list of user orders
+      operationId: listOrders
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, processing, shipped, delivered, cancelled, refunded]
+      responses:
+        '200':
+          description: Orders retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderListResponse'
+
+  /orders/{id}:
+    get:
+      tags: [Orders]
+      summary: Get order details
+      description: Retrieve detailed order information
+      operationId: getOrder
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Order retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderDetailResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /orders/{id}/cancel:
+    post:
+      tags: [Orders]
+      summary: Cancel order
+      description: Cancel order if status is pending or processing
+      operationId: cancelOrder
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Order cancelled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderDetailResponse'
+        '400':
+          description: Order cannot be cancelled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /orders/{id}/reorder:
+    post:
+      tags: [Orders]
+      summary: Reorder
+      description: Add all order items to cart
+      operationId: reorder
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Items added to cart
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartResponse'
+
+  # ========================================
+  # USER ENDPOINTS
+  # ========================================
+  /user/profile:
+    get:
+      tags: [User]
+      summary: Get user profile
+      description: Retrieve current user profile
+      operationId: getUserProfile
+      responses:
+        '200':
+          description: Profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+
+    put:
+      tags: [User]
+      summary: Update user profile
+      description: Update user profile information
+      operationId: updateUserProfile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /user/password:
+    put:
+      tags: [User]
+      summary: Change password
+      description: Update user password
+      operationId: changePassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+      responses:
+        '200':
+          description: Password changed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Invalid current password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /user/account:
+    delete:
+      tags: [User]
+      summary: Delete account
+      description: Permanently delete user account and data
+      operationId: deleteAccount
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteAccountRequest'
+      responses:
+        '200':
+          description: Account deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Cannot delete account with pending orders
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /user/addresses:
+    get:
+      tags: [User]
+      summary: List addresses
+      description: Get all user saved addresses
+      operationId: listAddresses
+      responses:
+        '200':
+          description: Addresses retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressListResponse'
+
+    post:
+      tags: [User]
+      summary: Add address
+      description: Add new saved address
+      operationId: addAddress
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddressRequest'
+      responses:
+        '201':
+          description: Address created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /user/addresses/{id}:
+    put:
+      tags: [User]
+      summary: Update address
+      description: Update existing address
+      operationId: updateAddress
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddressRequest'
+      responses:
+        '200':
+          description: Address updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags: [User]
+      summary: Delete address
+      description: Remove saved address
+      operationId: deleteAddress
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Address deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  # ========================================
+  # PET ENDPOINTS
+  # ========================================
+  /pets:
+    get:
+      tags: [Pets]
+      summary: List pets
+      description: Get all user pet profiles
+      operationId: listPets
+      responses:
+        '200':
+          description: Pets retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PetListResponse'
+
+    post:
+      tags: [Pets]
+      summary: Add pet
+      description: Create new pet profile
+      operationId: addPet
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PetRequest'
+      responses:
+        '201':
+          description: Pet created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PetResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /pets/{id}:
+    get:
+      tags: [Pets]
+      summary: Get pet details
+      description: Retrieve pet profile
+      operationId: getPet
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Pet retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PetResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags: [Pets]
+      summary: Update pet
+      description: Update pet profile
+      operationId: updatePet
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PetRequest'
+      responses:
+        '200':
+          description: Pet updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PetResponse'
+
+    delete:
+      tags: [Pets]
+      summary: Delete pet
+      description: Remove pet profile
+      operationId: deletePet
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Pet deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+# ========================================
+# COMPONENTS
+# ========================================
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT access token for authenticated requests
+
+  parameters:
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 24
+
+  responses:
+    BadRequest:
+      description: Bad request - validation error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Unauthorized:
+      description: Unauthorized - invalid or missing token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    # ========================================
+    # BASE SCHEMAS
+    # ========================================
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Operation completed successfully
+
+    ErrorResponse:
+      type: object
+      required:
+        - success
+        - error
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              example: VALIDATION_ERROR
+            message:
+              type: string
+              example: Invalid request data
+            details:
+              type: array
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                  message:
+                    type: string
+
+    PaginationMeta:
+      type: object
+      required:
+        - page
+        - limit
+        - total
+        - totalPages
+      properties:
+        page:
+          type: integer
+          example: 1
+        limit:
+          type: integer
+          example: 24
+        total:
+          type: integer
+          example: 100
+        totalPages:
+          type: integer
+          example: 5
+
+    # ========================================
+    # AUTH SCHEMAS
+    # ========================================
+    RegisterRequest:
+      type: object
+      required:
+        - email
+        - password
+        - passwordConfirm
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 255
+        password:
+          type: string
+          minLength: 8
+          description: Must contain uppercase, lowercase, and number
+        passwordConfirm:
+          type: string
+          minLength: 8
+
+    RegisterResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Verification email sent
+        data:
+          type: object
+          properties:
+            userId:
+              type: string
+              format: uuid
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    LoginResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            accessToken:
+              type: string
+              description: JWT access token (15 min expiry)
+            refreshToken:
+              type: string
+              description: JWT refresh token (30 day expiry)
+            user:
+              $ref: '#/components/schemas/User'
+
+    ForgotPasswordRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+
+    ResetPasswordRequest:
+      type: object
+      required:
+        - token
+        - password
+        - passwordConfirm
+      properties:
+        token:
+          type: string
+        password:
+          type: string
+          minLength: 8
+        passwordConfirm:
+          type: string
+          minLength: 8
+
+    RefreshTokenRequest:
+      type: object
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
+          type: string
+
+    RefreshTokenResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            accessToken:
+              type: string
+
+    # ========================================
+    # USER SCHEMAS
+    # ========================================
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        firstName:
+          type: string
+          nullable: true
+        lastName:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        emailVerified:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    UserProfileResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          allOf:
+            - $ref: '#/components/schemas/User'
+            - type: object
+              properties:
+                marketingOptIn:
+                  type: boolean
+
+    UpdateProfileRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+          maxLength: 100
+        lastName:
+          type: string
+          maxLength: 100
+        phone:
+          type: string
+          maxLength: 20
+        marketingOptIn:
+          type: boolean
+
+    ChangePasswordRequest:
+      type: object
+      required:
+        - currentPassword
+        - newPassword
+        - newPasswordConfirm
+      properties:
+        currentPassword:
+          type: string
+        newPassword:
+          type: string
+          minLength: 8
+        newPasswordConfirm:
+          type: string
+          minLength: 8
+
+    DeleteAccountRequest:
+      type: object
+      required:
+        - password
+      properties:
+        password:
+          type: string
+
+    # ========================================
+    # ADDRESS SCHEMAS
+    # ========================================
+    Address:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - addressLine1
+        - city
+        - state
+        - zipCode
+        - phone
+      properties:
+        id:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+          maxLength: 100
+        lastName:
+          type: string
+          maxLength: 100
+        addressLine1:
+          type: string
+          maxLength: 255
+        addressLine2:
+          type: string
+          maxLength: 255
+          nullable: true
+        city:
+          type: string
+          maxLength: 100
+        state:
+          type: string
+          maxLength: 50
+        zipCode:
+          type: string
+          maxLength: 20
+        phone:
+          type: string
+          maxLength: 20
+        isDefault:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    AddressRequest:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - addressLine1
+        - city
+        - state
+        - zipCode
+        - phone
+      properties:
+        firstName:
+          type: string
+          maxLength: 100
+        lastName:
+          type: string
+          maxLength: 100
+        addressLine1:
+          type: string
+          maxLength: 255
+        addressLine2:
+          type: string
+          maxLength: 255
+        city:
+          type: string
+          maxLength: 100
+        state:
+          type: string
+          maxLength: 50
+        zipCode:
+          type: string
+          maxLength: 20
+        phone:
+          type: string
+          maxLength: 20
+        isDefault:
+          type: boolean
+
+    AddressResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/Address'
+
+    AddressListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Address'
+
+    # ========================================
+    # PET SCHEMAS
+    # ========================================
+    Pet:
+      type: object
+      required:
+        - id
+        - name
+        - species
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        name:
+          type: string
+          maxLength: 100
+        species:
+          type: string
+          enum: [dog, cat, small_pet]
+        breed:
+          type: string
+          maxLength: 100
+          nullable: true
+        birthDate:
+          type: string
+          format: date
+          nullable: true
+        weight:
+          type: number
+          nullable: true
+        weightUnit:
+          type: string
+          enum: [lbs, kg]
+          default: lbs
+        photoUrl:
+          type: string
+          format: uri
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    PetRequest:
+      type: object
+      required:
+        - name
+        - species
+      properties:
+        name:
+          type: string
+          maxLength: 100
+        species:
+          type: string
+          enum: [dog, cat, small_pet]
+        breed:
+          type: string
+          maxLength: 100
+        birthDate:
+          type: string
+          format: date
+        weight:
+          type: number
+        weightUnit:
+          type: string
+          enum: [lbs, kg]
+        photoUrl:
+          type: string
+          format: uri
+
+    PetResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/Pet'
+
+    PetListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Pet'
+
+    # ========================================
+    # PRODUCT SCHEMAS
+    # ========================================
+    ProductCard:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        sku:
+          type: string
+        name:
+          type: string
+        slug:
+          type: string
+        imageUrl:
+          type: string
+          format: uri
+        price:
+          type: number
+          format: decimal
+        comparePrice:
+          type: number
+          format: decimal
+          nullable: true
+        averageRating:
+          type: number
+          minimum: 0
+          maximum: 5
+        reviewCount:
+          type: integer
+        stockStatus:
+          type: string
+          enum: [in_stock, low_stock, out_of_stock]
+        brand:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            name:
+              type: string
+            slug:
+              type: string
+
+    ProductDetail:
+      allOf:
+        - $ref: '#/components/schemas/ProductCard'
+        - type: object
+          properties:
+            shortDescription:
+              type: string
+              nullable: true
+            description:
+              type: string
+              nullable: true
+            stockQuantity:
+              type: integer
+            specifications:
+              type: object
+              additionalProperties: true
+            images:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  url:
+                    type: string
+                    format: uri
+                  altText:
+                    type: string
+                  sortOrder:
+                    type: integer
+                  isPrimary:
+                    type: boolean
+            category:
+              type: object
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                name:
+                  type: string
+                slug:
+                  type: string
+            relatedProducts:
+              type: array
+              items:
+                $ref: '#/components/schemas/ProductCard'
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
+
+    ProductListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductCard'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    ProductDetailResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/ProductDetail'
+
+    # ========================================
+    # CATEGORY SCHEMAS
+    # ========================================
+    Category:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+          nullable: true
+        imageUrl:
+          type: string
+          format: uri
+          nullable: true
+        parentId:
+          type: string
+          format: uuid
+          nullable: true
+        productCount:
+          type: integer
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/Category'
+
+    CategoryListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Category'
+
+    CategoryDetailResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          allOf:
+            - $ref: '#/components/schemas/Category'
+            - type: object
+              properties:
+                products:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/ProductCard'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    # ========================================
+    # BRAND SCHEMAS
+    # ========================================
+    Brand:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+          nullable: true
+        logoUrl:
+          type: string
+          format: uri
+          nullable: true
+        productCount:
+          type: integer
+
+    BrandListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Brand'
+
+    BrandDetailResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          allOf:
+            - $ref: '#/components/schemas/Brand'
+            - type: object
+              properties:
+                products:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/ProductCard'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    # ========================================
+    # CART SCHEMAS
+    # ========================================
+    CartItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        productId:
+          type: string
+          format: uuid
+        productName:
+          type: string
+        productImage:
+          type: string
+          format: uri
+        productSlug:
+          type: string
+        price:
+          type: number
+          format: decimal
+        quantity:
+          type: integer
+          minimum: 1
+        lineTotal:
+          type: number
+          format: decimal
+        stockAvailable:
+          type: integer
+
+    Cart:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartItem'
+        subtotal:
+          type: number
+          format: decimal
+        itemCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CartResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/Cart'
+
+    AddToCartRequest:
+      type: object
+      required:
+        - productId
+        - quantity
+      properties:
+        productId:
+          type: string
+          format: uuid
+        quantity:
+          type: integer
+          minimum: 1
+          maximum: 10
+
+    UpdateCartItemRequest:
+      type: object
+      required:
+        - quantity
+      properties:
+        quantity:
+          type: integer
+          minimum: 0
+          maximum: 10
+
+    MergeCartRequest:
+      type: object
+      required:
+        - guestCartId
+      properties:
+        guestCartId:
+          type: string
+          format: uuid
+
+    # ========================================
+    # CHECKOUT SCHEMAS
+    # ========================================
+    ShippingOption:
+      type: object
+      properties:
+        id:
+          type: string
+          enum: [standard, expedited]
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+          format: decimal
+        estimatedDays:
+          type: string
+        isFree:
+          type: boolean
+
+    ShippingRatesRequest:
+      type: object
+      required:
+        - address
+      properties:
+        address:
+          $ref: '#/components/schemas/AddressRequest'
+
+    ShippingRatesResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ShippingOption'
+
+    ValidateCheckoutRequest:
+      type: object
+      required:
+        - shippingAddress
+      properties:
+        shippingAddress:
+          $ref: '#/components/schemas/AddressRequest'
+        billingAddress:
+          $ref: '#/components/schemas/AddressRequest'
+
+    ValidateCheckoutResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            valid:
+              type: boolean
+            stockIssues:
+              type: array
+              items:
+                type: object
+                properties:
+                  productId:
+                    type: string
+                    format: uuid
+                  requestedQuantity:
+                    type: integer
+                  availableQuantity:
+                    type: integer
+
+    CreatePaymentRequest:
+      type: object
+      required:
+        - shippingAddress
+        - shippingMethodId
+      properties:
+        shippingAddress:
+          $ref: '#/components/schemas/AddressRequest'
+        billingAddress:
+          $ref: '#/components/schemas/AddressRequest'
+        shippingMethodId:
+          type: string
+        promoCode:
+          type: string
+
+    CreatePaymentResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            clientSecret:
+              type: string
+            paymentIntentId:
+              type: string
+            amount:
+              type: number
+              format: decimal
+
+    ConfirmOrderRequest:
+      type: object
+      required:
+        - paymentIntentId
+        - shippingAddress
+        - shippingMethodId
+      properties:
+        paymentIntentId:
+          type: string
+        shippingAddress:
+          $ref: '#/components/schemas/AddressRequest'
+        billingAddress:
+          $ref: '#/components/schemas/AddressRequest'
+        shippingMethodId:
+          type: string
+        promoCode:
+          type: string
+        notes:
+          type: string
+
+    ApplyPromoRequest:
+      type: object
+      required:
+        - code
+      properties:
+        code:
+          type: string
+          maxLength: 50
+
+    ApplyPromoResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            code:
+              type: string
+            discountType:
+              type: string
+              enum: [percentage, fixed]
+            discountValue:
+              type: number
+              format: decimal
+            discountAmount:
+              type: number
+              format: decimal
+
+    # ========================================
+    # ORDER SCHEMAS
+    # ========================================
+    OrderItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        productId:
+          type: string
+          format: uuid
+        productName:
+          type: string
+        productSku:
+          type: string
+        price:
+          type: number
+          format: decimal
+        quantity:
+          type: integer
+        total:
+          type: number
+          format: decimal
+
+    Order:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        orderNumber:
+          type: string
+        userId:
+          type: string
+          format: uuid
+          nullable: true
+        email:
+          type: string
+          format: email
+        status:
+          type: string
+          enum: [pending, processing, shipped, delivered, cancelled, refunded]
+        subtotal:
+          type: number
+          format: decimal
+        shippingAmount:
+          type: number
+          format: decimal
+        taxAmount:
+          type: number
+          format: decimal
+        discountAmount:
+          type: number
+          format: decimal
+        total:
+          type: number
+          format: decimal
+        shippingAddress:
+          $ref: '#/components/schemas/Address'
+        shippingMethod:
+          type: string
+        trackingNumber:
+          type: string
+          nullable: true
+        trackingUrl:
+          type: string
+          format: uri
+          nullable: true
+        promoCode:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        placedAt:
+          type: string
+          format: date-time
+        shippedAt:
+          type: string
+          format: date-time
+          nullable: true
+        deliveredAt:
+          type: string
+          format: date-time
+          nullable: true
+        cancelledAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    OrderListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Order'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    OrderDetailResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          allOf:
+            - $ref: '#/components/schemas/Order'
+            - type: object
+              properties:
+                items:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/OrderItem'
+
+    OrderResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/Order'
