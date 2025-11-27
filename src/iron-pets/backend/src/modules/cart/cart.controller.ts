@@ -19,7 +19,7 @@ export class CartController {
    */
   getCart = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const sessionId = req.sessionID;
+      const sessionId = req.sessionId || req.headers['x-session-id'] as string;
       const userId = req.user?.id;
 
       const cart = await this.cartService.getCart({ sessionId, userId });
@@ -39,7 +39,7 @@ export class CartController {
    */
   addItem = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const sessionId = req.sessionID;
+      const sessionId = req.sessionId || req.headers['x-session-id'] as string;
       const userId = req.user?.id;
       const { productId, quantity } = req.body;
 
@@ -66,7 +66,7 @@ export class CartController {
    */
   updateItem = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const sessionId = req.sessionID;
+      const sessionId = req.sessionId || req.headers['x-session-id'] as string;
       const userId = req.user?.id;
       const itemId = req.params.id;
       const { quantity } = req.body;
@@ -94,7 +94,7 @@ export class CartController {
    */
   removeItem = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const sessionId = req.sessionID;
+      const sessionId = req.sessionId || req.headers['x-session-id'] as string;
       const userId = req.user?.id;
       const itemId = req.params.id;
 
@@ -120,7 +120,7 @@ export class CartController {
    */
   clearCart = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const sessionId = req.sessionID;
+      const sessionId = req.sessionId || req.headers['x-session-id'] as string;
       const userId = req.user?.id;
 
       const cart = await this.cartService.clearCart({ sessionId, userId });
@@ -139,17 +139,18 @@ export class CartController {
    * POST /cart/merge
    * Merge guest cart with user cart on login
    */
-  mergeCart = async (req: Request, res: Response, next: NextFunction) => {
+  mergeCart = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       // Require authentication
       if (!req.user) {
-        return res.status(401).json({
+        res.status(401).json({
           success: false,
           error: 'Authentication required',
         });
+        return;
       }
 
-      const userSessionId = req.sessionID;
+      const userSessionId = req.sessionId || req.headers['x-session-id'] as string;
       const userId = req.user.id;
       const { guestSessionId } = req.body;
 

@@ -1,12 +1,13 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useOrder } from '@/hooks/useOrders';
 import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 
-export default function OrderConfirmationPage() {
+function OrderConfirmationContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get('orderId');
 
@@ -195,6 +196,14 @@ export default function OrderConfirmationPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function OrderConfirmationPage() {
+  return (
+    <Suspense fallback={<ConfirmationSkeleton />}>
+      <OrderConfirmationContent />
+    </Suspense>
   );
 }
 

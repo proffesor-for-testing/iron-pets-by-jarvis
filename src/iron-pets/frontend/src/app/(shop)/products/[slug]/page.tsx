@@ -6,6 +6,7 @@ import { ProductTabs } from '@/components/products/ProductTabs';
 import { RelatedProducts } from '@/components/products/RelatedProducts';
 import { AddToCartButton } from '@/components/products/AddToCartButton';
 import { mockProducts } from '@/lib/mock-data';
+import { Product } from '@/types';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,8 +51,9 @@ async function getProduct(slug: string) {
   }
 }
 
-function getRelatedProducts(productId: string) {
-  return mockProducts.filter(p => p.id !== productId).slice(0, 4);
+function getRelatedProducts(productId: string): Product[] {
+  // Cast mock products to Product type (mock data has compatible structure for display)
+  return mockProducts.filter(p => p.id !== productId).slice(0, 4) as unknown as Product[];
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {

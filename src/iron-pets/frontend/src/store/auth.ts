@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 export interface User {
   id: string;
@@ -70,12 +70,24 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'iron-pets-auth',
+      storage: createJSONStorage(() => {
+        // Return a no-op storage during SSR
+        if (typeof window === 'undefined') {
+          return {
+            getItem: () => null,
+            setItem: () => {},
+            removeItem: () => {},
+          };
+        }
+        return localStorage;
+      }),
       partialize: (state) => ({
         user: state.user,
         token: state.token,
         refreshToken: state.refreshToken,
         isAuthenticated: state.isAuthenticated,
       }),
+      skipHydration: true,
     }
   )
 );

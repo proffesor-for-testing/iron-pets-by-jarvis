@@ -18,37 +18,28 @@ interface Category {
 const categories: Category[] = [
   {
     name: 'Dogs',
-    href: '/dogs',
+    href: '/categories/dogs',
     subcategories: [
-      { name: 'Food & Treats', href: '/dogs/food' },
-      { name: 'Toys', href: '/dogs/toys' },
-      { name: 'Beds & Furniture', href: '/dogs/beds' },
-      { name: 'Collars & Leashes', href: '/dogs/collars' },
-      { name: 'Grooming', href: '/dogs/grooming' },
-      { name: 'Health & Wellness', href: '/dogs/health' },
+      { name: 'Dog Food', href: '/categories/dog-food' },
+      { name: 'Dog Treats', href: '/categories/dog-treats' },
+      { name: 'Dog Toys', href: '/categories/dog-toys' },
     ],
   },
   {
     name: 'Cats',
-    href: '/cats',
+    href: '/categories/cats',
     subcategories: [
-      { name: 'Food & Treats', href: '/cats/food' },
-      { name: 'Toys', href: '/cats/toys' },
-      { name: 'Litter & Accessories', href: '/cats/litter' },
-      { name: 'Scratchers', href: '/cats/scratchers' },
-      { name: 'Grooming', href: '/cats/grooming' },
-      { name: 'Health & Wellness', href: '/cats/health' },
+      { name: 'Cat Food', href: '/categories/cat-food' },
+      { name: 'Cat Treats', href: '/categories/cat-treats' },
+      { name: 'Cat Toys', href: '/categories/cat-toys' },
     ],
   },
   {
     name: 'Small Pets',
-    href: '/small-pets',
+    href: '/categories/small-pets',
     subcategories: [
-      { name: 'Food & Treats', href: '/small-pets/food' },
-      { name: 'Habitats', href: '/small-pets/habitats' },
-      { name: 'Bedding', href: '/small-pets/bedding' },
-      { name: 'Toys & Accessories', href: '/small-pets/toys' },
-      { name: 'Health Care', href: '/small-pets/health' },
+      { name: 'Small Pet Food', href: '/categories/small-pet-food' },
+      { name: 'Bedding & Litter', href: '/categories/bedding-litter' },
     ],
   },
 ];

@@ -731,6 +731,7 @@ export interface ShippingOption {
   price: number;
   estimatedDays: string;
   freeThreshold?: number;
+  isFree?: boolean;
 }
 
 // ============================================================================
@@ -795,13 +796,17 @@ export const SHIPPING_OPTIONS: ShippingOption[] = [
     name: 'Standard',
     description: '5-7 business days',
     price: 5.99,
+    estimatedDays: '5-7',
     freeThreshold: 50,
+    isFree: false,
   },
   {
     id: 'expedited',
     name: 'Expedited',
     description: '2-3 business days',
     price: 12.99,
+    estimatedDays: '2-3',
+    isFree: false,
   },
 ];
 

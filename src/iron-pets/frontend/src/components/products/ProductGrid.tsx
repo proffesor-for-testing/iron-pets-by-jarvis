@@ -5,6 +5,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 
 interface Product {
   id: string;
+  slug?: string;
   name: string;
   price: number;
   originalPrice?: number;

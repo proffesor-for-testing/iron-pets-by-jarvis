@@ -28,17 +28,17 @@ export function Header({ cartItemCount = 0, isAuthenticated = false, userName }:
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
-            <Link href="/dogs" className="text-sm font-medium hover:text-primary transition-colors">
+            <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
+              All Products
+            </Link>
+            <Link href="/categories/dogs" className="text-sm font-medium hover:text-primary transition-colors">
               Dogs
             </Link>
-            <Link href="/cats" className="text-sm font-medium hover:text-primary transition-colors">
+            <Link href="/categories/cats" className="text-sm font-medium hover:text-primary transition-colors">
               Cats
             </Link>
-            <Link href="/small-pets" className="text-sm font-medium hover:text-primary transition-colors">
+            <Link href="/categories/small-pets" className="text-sm font-medium hover:text-primary transition-colors">
               Small Pets
-            </Link>
-            <Link href="/deals" className="text-sm font-medium text-red-600 hover:text-red-700 transition-colors">
-              Deals
             </Link>
           </nav>
 
@@ -87,25 +87,25 @@ export function Header({ cartItemCount = 0, isAuthenticated = false, userName }:
                     <div className="absolute right-0 mt-2 w-48 rounded-lg border bg-white shadow-lg">
                       <div className="py-1">
                         <Link
-                          href="/profile"
+                          href="/account"
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                           onClick={() => setIsUserMenuOpen(false)}
                         >
-                          My Profile
+                          My Account
                         </Link>
                         <Link
-                          href="/orders"
+                          href="/account/orders"
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                           onClick={() => setIsUserMenuOpen(false)}
                         >
                           My Orders
                         </Link>
                         <Link
-                          href="/wishlist"
+                          href="/account/pets"
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                           onClick={() => setIsUserMenuOpen(false)}
                         >
-                          Wishlist
+                          My Pets
                         </Link>
                         <hr className="my-1" />
                         <button
@@ -165,32 +165,32 @@ export function Header({ cartItemCount = 0, isAuthenticated = false, userName }:
         <div className="md:hidden border-t bg-white">
           <nav className="container mx-auto px-4 py-4 space-y-2">
             <Link
-              href="/dogs"
+              href="/products"
+              className="block py-2 text-sm font-medium hover:text-primary transition-colors"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              All Products
+            </Link>
+            <Link
+              href="/categories/dogs"
               className="block py-2 text-sm font-medium hover:text-primary transition-colors"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Dogs
             </Link>
             <Link
-              href="/cats"
+              href="/categories/cats"
               className="block py-2 text-sm font-medium hover:text-primary transition-colors"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Cats
             </Link>
             <Link
-              href="/small-pets"
+              href="/categories/small-pets"
               className="block py-2 text-sm font-medium hover:text-primary transition-colors"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Small Pets
-            </Link>
-            <Link
-              href="/deals"
-              className="block py-2 text-sm font-medium text-red-600 hover:text-red-700 transition-colors"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Deals
             </Link>
             <hr className="my-2" />
             {!isAuthenticated && (

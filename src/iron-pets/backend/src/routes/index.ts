@@ -1,11 +1,50 @@
 import { Router } from 'express';
-import { authRoutes } from '../modules/auth';
-import { catalogRoutes } from '../modules/catalog';
-import { cartRoutes } from '../modules/cart';
-import { checkoutRoutes } from '../modules/checkout';
-import { ordersRoutes } from '../modules/orders';
-import { userRoutes } from '../modules/user';
-import { petsRoutes } from '../modules/pets';
+import { PrismaClient } from '@prisma/client';
+import { createAuthRouter } from '../modules/auth';
+import { createCatalogRoutes, CatalogService, CatalogController } from '../modules/catalog';
+import cartRoutes from '../modules/cart/cart.routes';
+import { createUserRouter } from '../modules/user';
+import { createPetsRouter } from '../modules/pets';
+import { JwtService } from '../utils/jwt.service';
+import { EmailService } from '../utils/email.service';
+import { MockEmailService, getMockEmailService } from '../services/mock-email.service';
+import { appConfig } from '../config';
+
+// Initialize Prisma client
+const prisma = new PrismaClient();
+
+// Initialize services
+const jwtService = new JwtService({
+  secret: appConfig.auth.jwt.secret,
+  expiresIn: appConfig.auth.jwt.expiresIn,
+  refreshSecret: appConfig.auth.jwt.refreshSecret,
+  refreshExpiresIn: appConfig.auth.jwt.refreshExpiresIn,
+});
+
+// Email service (mock or real)
+let emailService: EmailService | MockEmailService;
+if (appConfig.email.useMock) {
+  emailService = getMockEmailService(appConfig.email.fromEmail);
+} else {
+  emailService = new EmailService(appConfig.app.baseUrl);
+}
+
+// Module services
+const catalogService = new CatalogService(prisma);
+
+// Module controllers
+const catalogController = new CatalogController(catalogService);
+
+// Create routers
+const authRoutes = createAuthRouter(prisma, jwtService, emailService as any);
+const catalogRoutes = createCatalogRoutes(catalogController);
+const userRoutes = createUserRouter(prisma);
+const petsRoutes = createPetsRouter(prisma);
+
+// Checkout and orders routes need more complex setup - use placeholder for now
+// These will be mounted in app.ts with full dependency injection
+const checkoutRoutes = Router();
+const ordersRoutes = Router();
 
 const router = Router();
 

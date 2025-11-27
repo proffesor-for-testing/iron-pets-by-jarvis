@@ -52,25 +52,24 @@ export class AuthService {
     const verificationToken = crypto.randomBytes(32).toString('hex');
     const verificationExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
-    // Create user
+    // Create user with profile
     const user = await this.prisma.user.create({
       data: {
         email: data.email,
         passwordHash,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        isEmailVerified: false,
+        emailVerified: false,
         emailVerificationToken: verificationToken,
         emailVerificationExpiry: verificationExpiry,
         failedLoginAttempts: 0,
+        profile: {
+          create: {
+            firstName: data.firstName,
+            lastName: data.lastName,
+          },
+        },
       },
-      select: {
-        id: true,
-        email: true,
-        firstName: true,
-        lastName: true,
-        isEmailVerified: true,
-        createdAt: true,
+      include: {
+        profile: true,
       },
     });
 
@@ -79,15 +78,15 @@ export class AuthService {
       email: user.email,
       userId: user.id,
       token: verificationToken,
-      firstName: user.firstName,
+      firstName: user.profile?.firstName || 'User',
     });
 
     return {
       userId: user.id,
       email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      isEmailVerified: user.isEmailVerified,
+      firstName: user.profile?.firstName,
+      lastName: user.profile?.lastName,
+      isEmailVerified: user.emailVerified,
     };
   }
 
@@ -96,9 +95,10 @@ export class AuthService {
    * REQ-AUTH-005: Account Lockout
    */
   async login(data: LoginDTO) {
-    // Find user
+    // Find user with profile
     const user = await this.prisma.user.findUnique({
       where: { email: data.email },
+      include: { profile: true },
     });
 
     if (!user) {
@@ -121,7 +121,7 @@ export class AuthService {
     if (!isPasswordValid) {
       // Increment failed login attempts
       const newFailedAttempts = user.failedLoginAttempts + 1;
-      const updateData: any = {
+      const updateData: { failedLoginAttempts: number; accountLockedUntil?: Date } = {
         failedLoginAttempts: newFailedAttempts,
       };
 
@@ -179,9 +179,9 @@ export class AuthService {
       user: {
         id: user.id,
         email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        isEmailVerified: user.isEmailVerified,
+        firstName: user.profile?.firstName,
+        lastName: user.profile?.lastName,
+        isEmailVerified: user.emailVerified,
       },
     };
   }
@@ -212,6 +212,7 @@ export class AuthService {
   async forgotPassword(data: ForgotPasswordDTO) {
     const user = await this.prisma.user.findUnique({
       where: { email: data.email },
+      include: { profile: true },
     });
 
     // Don't reveal if user exists for security
@@ -236,7 +237,7 @@ export class AuthService {
     await this.emailService.sendPasswordResetEmail({
       email: user.email,
       token: resetToken,
-      firstName: user.firstName,
+      firstName: user.profile?.firstName || 'User',
     });
 
     return { success: true };
@@ -332,7 +333,7 @@ export class AuthService {
     await this.prisma.user.update({
       where: { id: user.id },
       data: {
-        isEmailVerified: true,
+        emailVerified: true,
         emailVerificationToken: null,
         emailVerificationExpiry: null,
       },

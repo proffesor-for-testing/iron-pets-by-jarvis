@@ -50,7 +50,7 @@ export class CatalogService {
    */
   async getAllCategories(): Promise<Category[]> {
     return this.prisma.category.findMany({
-      orderBy: [{ order: 'asc' }, { name: 'asc' }],
+      orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
       include: {
         _count: {
           select: { products: true },
@@ -165,7 +165,7 @@ export class CatalogService {
           brand: true,
           category: true,
           images: {
-            orderBy: { order: 'asc' },
+            orderBy: { sortOrder: 'asc' },
             take: 1,
           },
         },
@@ -188,7 +188,7 @@ export class CatalogService {
         brand: true,
         category: true,
         images: {
-          orderBy: { order: 'asc' },
+          orderBy: { sortOrder: 'asc' },
         },
       },
     });
@@ -211,7 +211,7 @@ export class CatalogService {
       include: {
         brand: true,
         images: {
-          orderBy: { order: 'asc' },
+          orderBy: { sortOrder: 'asc' },
           take: 1,
         },
       },
@@ -297,13 +297,13 @@ export class CatalogService {
   /**
    * Build common product query options
    */
-  private buildProductQuery(filters: ProductFilters) {
+  private buildProductQuery(_filters: ProductFilters) {
     return {
       include: {
         brand: true,
         category: true,
         images: {
-          orderBy: { order: 'asc' as const },
+          orderBy: { sortOrder: 'asc' as const },
           take: 1,
         },
       },

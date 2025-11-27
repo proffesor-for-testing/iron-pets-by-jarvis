@@ -7,18 +7,28 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 # Install dependencies
-COPY package.json package-lock.json ./
+COPY package.json package-lock.json* ./
 RUN npm ci --legacy-peer-deps
 
 # Build stage
 FROM base AS builder
 WORKDIR /app
 
+# Build arguments for environment variables
+ARG NEXT_PUBLIC_API_URL=http://localhost:3001/api
+ARG NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
+ARG NEXT_PUBLIC_DEMO_MODE=false
+
+# Set environment variables for build
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=$NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+ENV NEXT_PUBLIC_DEMO_MODE=$NEXT_PUBLIC_DEMO_MODE
+ENV NEXT_TELEMETRY_DISABLED=1
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Build Next.js application
-ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
 # Production stage
