@@ -169,6 +169,7 @@ export function createApp(): Application {
   });
   ordersRoutes.get('/:id', async (req, res): Promise<void> => {
     try {
+      const userId = (req as any).user?.id;
       const order = await prisma.order.findUnique({
         where: { id: req.params.id },
         include: { items: true },
@@ -177,7 +178,136 @@ export function createApp(): Application {
         res.status(404).json({ success: false, error: 'Order not found' });
         return;
       }
+      // Check user ownership
+      if (order.userId !== userId) {
+        res.status(403).json({ success: false, error: 'Not authorized to view this order' });
+        return;
+      }
       res.json({ success: true, data: order });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+  // Cancel order endpoint
+  ordersRoutes.post('/:id/cancel', async (req, res): Promise<void> => {
+    try {
+      const userId = (req as any).user?.id;
+      const orderId = req.params.id;
+
+      const order = await prisma.order.findUnique({
+        where: { id: orderId },
+      });
+
+      if (!order) {
+        res.status(404).json({ success: false, error: 'Order not found' });
+        return;
+      }
+
+      if (order.userId !== userId) {
+        res.status(403).json({ success: false, error: 'Not authorized' });
+        return;
+      }
+
+      // Only allow cancellation of pending or processing orders
+      if (!['pending', 'processing'].includes(order.status)) {
+        res.status(400).json({
+          success: false,
+          error: 'Order cannot be cancelled. Only pending or processing orders can be cancelled.'
+        });
+        return;
+      }
+
+      const updatedOrder = await prisma.order.update({
+        where: { id: orderId },
+        data: {
+          status: 'cancelled',
+          cancelledAt: new Date(),
+        },
+        include: { items: true },
+      });
+
+      res.json({ success: true, data: updatedOrder });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+  // Reorder endpoint - adds items from past order to cart
+  ordersRoutes.post('/:id/reorder', async (req, res): Promise<void> => {
+    try {
+      const userId = (req as any).user?.id;
+      const sessionId = req.headers['x-session-id'] as string;
+      const orderId = req.params.id;
+
+      const order = await prisma.order.findUnique({
+        where: { id: orderId },
+        include: { items: true },
+      });
+
+      if (!order) {
+        res.status(404).json({ success: false, error: 'Order not found' });
+        return;
+      }
+
+      if (order.userId !== userId) {
+        res.status(403).json({ success: false, error: 'Not authorized' });
+        return;
+      }
+
+      // Find or create cart with expiration date (30 days from now)
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 30);
+
+      let cart = await prisma.cart.findFirst({
+        where: userId ? { userId } : { sessionId },
+      });
+
+      if (!cart) {
+        cart = await prisma.cart.create({
+          data: {
+            userId,
+            sessionId: sessionId || undefined,
+            expiresAt,
+          },
+        });
+      }
+
+      // Add items from order to cart
+      for (const item of order.items) {
+        const existingItem = await prisma.cartItem.findFirst({
+          where: {
+            cartId: cart.id,
+            productId: item.productId,
+          },
+        });
+
+        if (existingItem) {
+          await prisma.cartItem.update({
+            where: { id: existingItem.id },
+            data: { quantity: existingItem.quantity + item.quantity },
+          });
+        } else {
+          await prisma.cartItem.create({
+            data: {
+              cartId: cart.id,
+              productId: item.productId,
+              quantity: item.quantity,
+              priceAtAdd: item.price,
+            },
+          });
+        }
+      }
+
+      // Return updated cart
+      const updatedCart = await prisma.cart.findUnique({
+        where: { id: cart.id },
+        include: { items: { include: { product: true } } },
+      });
+
+      res.json({
+        success: true,
+        data: updatedCart,
+        message: `${order.items.length} item(s) added to cart`,
+      });
     } catch (error: any) {
       res.status(500).json({ success: false, error: error.message });
     }
