@@ -1,15 +1,19 @@
+'use client';
+
 import { useState, useCallback } from 'react';
 
-interface Toast {
+export interface Toast {
   id: string;
-  message: string;
-  type: 'success' | 'error' | 'warning' | 'info';
+  title: string;
+  description?: string;
+  variant: 'success' | 'error' | 'warning' | 'info';
   duration?: number;
 }
 
-interface ToastOptions {
-  message: string;
-  type?: Toast['type'];
+export interface ToastOptions {
+  title: string;
+  description?: string;
+  variant?: Toast['variant'];
   duration?: number;
 }
 
@@ -18,13 +22,14 @@ export function useToast() {
 
   const toast = useCallback((options: ToastOptions | string) => {
     const toastOptions: ToastOptions = typeof options === 'string'
-      ? { message: options, type: 'info' }
+      ? { title: options, variant: 'info' }
       : options;
 
     const newToast: Toast = {
       id: Math.random().toString(36).substring(2, 9),
-      message: toastOptions.message,
-      type: toastOptions.type || 'info',
+      title: toastOptions.title,
+      description: toastOptions.description,
+      variant: toastOptions.variant || 'info',
       duration: toastOptions.duration || 3000,
     };
 
@@ -42,20 +47,20 @@ export function useToast() {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
-  const success = useCallback((message: string, duration?: number) => {
-    return toast({ message, type: 'success', duration });
+  const success = useCallback((title: string, description?: string, duration?: number) => {
+    return toast({ title, description, variant: 'success', duration });
   }, [toast]);
 
-  const error = useCallback((message: string, duration?: number) => {
-    return toast({ message, type: 'error', duration });
+  const error = useCallback((title: string, description?: string, duration?: number) => {
+    return toast({ title, description, variant: 'error', duration });
   }, [toast]);
 
-  const warning = useCallback((message: string, duration?: number) => {
-    return toast({ message, type: 'warning', duration });
+  const warning = useCallback((title: string, description?: string, duration?: number) => {
+    return toast({ title, description, variant: 'warning', duration });
   }, [toast]);
 
-  const info = useCallback((message: string, duration?: number) => {
-    return toast({ message, type: 'info', duration });
+  const info = useCallback((title: string, description?: string, duration?: number) => {
+    return toast({ title, description, variant: 'info', duration });
   }, [toast]);
 
   return {
