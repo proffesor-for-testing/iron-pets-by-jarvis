@@ -47,9 +47,14 @@ jest.mock('next/navigation', () => ({
 // Mock next/image component
 jest.mock('next/image', () => ({
   __esModule: true,
-  default: (props: any) => {
-    // eslint-disable-next-line jsx-a11y/alt-text, @next/next/no-img-element
-    return <img {...props} />;
+  default: function MockImage(props: Record<string, unknown>) {
+    const { src, alt, ...rest } = props;
+    // Using createElement to avoid JSX transpilation issues
+    return require('react').createElement('img', {
+      src: typeof src === 'object' && src !== null && 'src' in src ? (src as { src: string }).src : src,
+      alt,
+      ...rest,
+    });
   },
 }));
 

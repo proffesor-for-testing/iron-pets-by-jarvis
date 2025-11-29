@@ -27,9 +27,9 @@ export default function AuthLayout({
         <div className="container mx-auto px-4 py-8 text-center text-sm text-gray-600">
           <p>&copy; 2024 Iron Pets. All rights reserved.</p>
           <div className="flex justify-center gap-6 mt-4">
-            <Link href="/terms" className="hover:text-gray-900">Terms</Link>
-            <Link href="/privacy" className="hover:text-gray-900">Privacy</Link>
-            <Link href="/help" className="hover:text-gray-900">Help</Link>
+            <Link href="/info/terms" className="hover:text-gray-900">Terms</Link>
+            <Link href="/info/privacy" className="hover:text-gray-900">Privacy</Link>
+            <Link href="/info/faq" className="hover:text-gray-900">Help</Link>
           </div>
         </div>
       </footer>
