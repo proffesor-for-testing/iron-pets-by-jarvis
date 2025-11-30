@@ -65,27 +65,27 @@ export function Footer() {
             <h3 className="text-white font-semibold mb-4">Shop</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/dogs" className="hover:text-primary transition-colors">
+                <Link href="/categories/dogs" className="hover:text-primary transition-colors">
                   Dog Supplies
                 </Link>
               </li>
               <li>
-                <Link href="/cats" className="hover:text-primary transition-colors">
+                <Link href="/categories/cats" className="hover:text-primary transition-colors">
                   Cat Supplies
                 </Link>
               </li>
               <li>
-                <Link href="/small-pets" className="hover:text-primary transition-colors">
+                <Link href="/categories/small-pets" className="hover:text-primary transition-colors">
                   Small Pets
                 </Link>
               </li>
               <li>
-                <Link href="/deals" className="hover:text-primary transition-colors">
+                <Link href="/products?sale=true" className="hover:text-primary transition-colors">
                   Special Deals
                 </Link>
               </li>
               <li>
-                <Link href="/new-arrivals" className="hover:text-primary transition-colors">
+                <Link href="/products?sort=newest" className="hover:text-primary transition-colors">
                   New Arrivals
                 </Link>
               </li>
@@ -97,27 +97,27 @@ export function Footer() {
             <h3 className="text-white font-semibold mb-4">Customer Service</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/contact" className="hover:text-primary transition-colors">
+                <Link href="/info/contact" className="hover:text-primary transition-colors">
                   Contact Us
                 </Link>
               </li>
               <li>
-                <Link href="/shipping" className="hover:text-primary transition-colors">
+                <Link href="/info/shipping" className="hover:text-primary transition-colors">
                   Shipping Info
                 </Link>
               </li>
               <li>
-                <Link href="/returns" className="hover:text-primary transition-colors">
+                <Link href="/info/returns" className="hover:text-primary transition-colors">
                   Returns & Exchanges
                 </Link>
               </li>
               <li>
-                <Link href="/faq" className="hover:text-primary transition-colors">
+                <Link href="/info/faq" className="hover:text-primary transition-colors">
                   FAQ
                 </Link>
               </li>
               <li>
-                <Link href="/track-order" className="hover:text-primary transition-colors">
+                <Link href="/account/orders" className="hover:text-primary transition-colors">
                   Track Order
                 </Link>
               </li>
@@ -151,16 +151,16 @@ export function Footer() {
               © {currentYear} Iron Pets. All rights reserved.
             </div>
             <div className="flex flex-wrap justify-center gap-4 text-sm">
-              <Link href="/privacy" className="hover:text-primary transition-colors">
+              <Link href="/info/privacy" className="hover:text-primary transition-colors">
                 Privacy Policy
               </Link>
-              <Link href="/terms" className="hover:text-primary transition-colors">
+              <Link href="/info/terms" className="hover:text-primary transition-colors">
                 Terms of Service
               </Link>
-              <Link href="/cookies" className="hover:text-primary transition-colors">
+              <Link href="/info/cookies" className="hover:text-primary transition-colors">
                 Cookie Policy
               </Link>
-              <Link href="/accessibility" className="hover:text-primary transition-colors">
+              <Link href="/info/accessibility" className="hover:text-primary transition-colors">
                 Accessibility
               </Link>
             </div>

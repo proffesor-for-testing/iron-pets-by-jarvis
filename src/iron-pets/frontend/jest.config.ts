@@ -50,6 +50,7 @@ const config: Config = {
     '<rootDir>/.next/',
     '<rootDir>/node_modules/',
     '<rootDir>/out/',
+    '<rootDir>/tests/e2e/',
   ],
 
   // Transform ignore patterns
