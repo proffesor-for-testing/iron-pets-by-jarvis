@@ -1,22 +1,14 @@
 {
   "mcpServers": {
-    "claude-flow@alpha": {
-      "type": "stdio",
-      "command": "npx",
-      "args": [
-        "claude-flow@alpha",
-        "mcp",
-        "start"
-      ]
-    },
-    "ruv-swarm": {
-      "type": "stdio",
-      "command": "npx",
-      "args": [
-        "ruv-swarm@latest",
-        "mcp",
-        "start"
-      ]
+    "agentic-qe": {
+      "command": "aqe-mcp",
+      "args": [],
+      "env": {
+        "AQE_PROJECT_ROOT": "/workspaces/iron-pets-by-jarvis",
+        "AQE_LEARNING_ENABLED": "true",
+        "AQE_WORKERS_ENABLED": "true",
+        "NODE_ENV": "production"
+      }
     }
   }
 }
