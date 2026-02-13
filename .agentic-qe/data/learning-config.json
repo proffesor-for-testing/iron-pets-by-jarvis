@@ -1,0 +1,13 @@
+{
+  "embeddingModel": "transformer",
+  "hnswConfig": {
+    "M": 16,
+    "efConstruction": 200,
+    "efSearch": 100
+  },
+  "qualityThreshold": 0.7,
+  "promotionThreshold": 3,
+  "databasePath": "/home/user/iron-pets-by-jarvis/.agentic-qe/data/memory.db",
+  "hnswIndexPath": "/home/user/iron-pets-by-jarvis/.agentic-qe/data/hnsw/index.bin",
+  "initialized": "2026-02-13T12:29:33.424Z"
+}

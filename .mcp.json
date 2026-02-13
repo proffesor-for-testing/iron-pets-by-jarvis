@@ -17,6 +17,16 @@
         "mcp",
         "start"
       ]
+    },
+    "agentic-qe": {
+      "command": "aqe-mcp",
+      "args": [],
+      "env": {
+        "AQE_PROJECT_ROOT": "/home/user/iron-pets-by-jarvis",
+        "AQE_LEARNING_ENABLED": "true",
+        "AQE_WORKERS_ENABLED": "true",
+        "NODE_ENV": "production"
+      }
     }
   }
 }
