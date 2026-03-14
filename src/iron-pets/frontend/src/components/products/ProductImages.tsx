@@ -4,9 +4,13 @@ import { useState } from 'react';
 import Image from 'next/image';
 
 export interface ProductImagesProps {
-  images: string[];
+  images: (string | { url: string; alt?: string })[];
   productName?: string;
   name?: string;
+}
+
+function getImageUrl(image: string | { url: string; alt?: string }): string {
+  return typeof image === 'string' ? image : image.url;
 }
 
 export function ProductImages({ images, productName, name }: ProductImagesProps) {
@@ -14,7 +18,7 @@ export function ProductImages({ images, productName, name }: ProductImagesProps)
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
 
-  const displayImages = images.length > 0 ? images : ['/placeholder-product.jpg'];
+  const displayImages = images.length > 0 ? images.map(getImageUrl) : ['/placeholder-product.jpg'];
 
   return (
     <div className="space-y-4">

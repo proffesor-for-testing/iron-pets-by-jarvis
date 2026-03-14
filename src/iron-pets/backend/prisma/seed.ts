@@ -11,7 +11,7 @@
  */
 
 import { PrismaClient, PetSpecies, DiscountType } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -689,7 +689,7 @@ async function main() {
   // ============================================
   console.log('👤 Creating demo user...');
 
-  const demoUser = await prisma.user.create({
+  await prisma.user.create({
     data: {
       email: 'demo@ironpets.com',
       passwordHash: await bcrypt.hash('Demo123!', 12),

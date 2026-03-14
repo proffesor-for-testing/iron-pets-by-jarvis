@@ -7,8 +7,8 @@
     "seed": "ts-node prisma/seed.ts"
   },
   "scripts": {
-    "dev": "nodemon",
-    "build": "tsc",
+    "dev": "TS_NODE_FILES=true nodemon --watch src --ext ts --exec \"node -r tsconfig-paths/register -r ts-node/register src/server.ts\"",
+    "build": "tsc && tsc-alias",
     "start": "node dist/server.js",
     "test": "jest",
     "test:unit": "jest --testPathPattern=tests/unit",
@@ -56,6 +56,8 @@
     "supertest": "^6.3.3",
     "ts-jest": "^29.1.1",
     "ts-node": "^10.9.2",
+    "tsc-alias": "^1.8.16",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.3.3"
   }
 }

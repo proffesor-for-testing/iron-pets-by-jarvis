@@ -51,7 +51,18 @@ async function getCategoryProducts(categorySlug: string, filters: Record<string,
   const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
 
   if (DEMO_MODE) {
-    let products = mockProducts.filter(p => p.category?.slug === categorySlug);
+    // Check if this is a parent category
+    const childSlugs = mockCategories
+      .filter(c => c.parentSlug === categorySlug)
+      .map(c => c.slug);
+
+    let products;
+    if (childSlugs.length > 0) {
+      // Parent category: show products from all child categories
+      products = mockProducts.filter(p => childSlugs.includes(p.category?.slug));
+    } else {
+      products = mockProducts.filter(p => p.category?.slug === categorySlug);
+    }
 
     if (filters.minPrice) {
       products = products.filter(p => p.price >= Number(filters.minPrice));
@@ -75,13 +86,19 @@ async function getCategoryProducts(categorySlug: string, filters: Record<string,
     });
 
     if (!res.ok) {
-      const products = mockProducts.filter(p => p.category?.slug === categorySlug);
+      const childSlugs = mockCategories.filter(c => c.parentSlug === categorySlug).map(c => c.slug);
+      const products = childSlugs.length > 0
+        ? mockProducts.filter(p => childSlugs.includes(p.category?.slug))
+        : mockProducts.filter(p => p.category?.slug === categorySlug);
       return { products, total: products.length, totalPages: 1 };
     }
 
     return res.json();
   } catch {
-    const products = mockProducts.filter(p => p.category?.slug === categorySlug);
+    const childSlugs = mockCategories.filter(c => c.parentSlug === categorySlug).map(c => c.slug);
+    const products = childSlugs.length > 0
+      ? mockProducts.filter(p => childSlugs.includes(p.category?.slug))
+      : mockProducts.filter(p => p.category?.slug === categorySlug);
     return { products, total: products.length, totalPages: 1 };
   }
 }
