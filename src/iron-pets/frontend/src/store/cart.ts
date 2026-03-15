@@ -18,12 +18,6 @@ interface CartState {
   items: CartItem[];
   isOpen: boolean;
 
-  // Computed values
-  itemCount: number;
-  subtotal: number;
-  tax: number;
-  total: number;
-
   // Actions
   addItem: (item: Omit<CartItem, 'quantity'> & { quantity?: number }) => void;
   removeItem: (itemId: string) => void;
@@ -34,17 +28,25 @@ interface CartState {
   closeCart: () => void;
 }
 
-const TAX_RATE = 0.08; // 8% tax
+export const TAX_RATE = 0.08; // 8% tax
+
+// Derive computed values from items — always consistent, never stale
+export function getCartTotals(items: CartItem[]) {
+  const subtotal = items.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
+  const tax = Math.round(subtotal * TAX_RATE * 100) / 100;
+  const total = subtotal + tax;
+  const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+  return { subtotal, tax, total, itemCount };
+}
 
 export const useCartStore = create<CartState>()(
   persist(
     (set, get) => ({
       items: [],
       isOpen: false,
-      itemCount: 0,
-      subtotal: 0,
-      tax: 0,
-      total: 0,
 
       addItem: (newItem) => {
         const items = get().items;
@@ -74,41 +76,11 @@ export const useCartStore = create<CartState>()(
           ];
         }
 
-        const subtotal = updatedItems.reduce(
-          (sum, item) => sum + item.price * item.quantity,
-          0
-        );
-        const tax = subtotal * TAX_RATE;
-        const total = subtotal + tax;
-        const itemCount = updatedItems.reduce((sum, item) => sum + item.quantity, 0);
-
-        set({
-          items: updatedItems,
-          subtotal,
-          tax,
-          total,
-          itemCount,
-        });
+        set({ items: updatedItems });
       },
 
       removeItem: (itemId) => {
-        const items = get().items.filter(item => item.id !== itemId);
-
-        const subtotal = items.reduce(
-          (sum, item) => sum + item.price * item.quantity,
-          0
-        );
-        const tax = subtotal * TAX_RATE;
-        const total = subtotal + tax;
-        const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
-
-        set({
-          items,
-          subtotal,
-          tax,
-          total,
-          itemCount,
-        });
+        set({ items: get().items.filter(item => item.id !== itemId) });
       },
 
       updateQuantity: (itemId, quantity) => {
@@ -117,35 +89,15 @@ export const useCartStore = create<CartState>()(
           return;
         }
 
-        const items = get().items.map(item =>
-          item.id === itemId ? { ...item, quantity } : item
-        );
-
-        const subtotal = items.reduce(
-          (sum, item) => sum + item.price * item.quantity,
-          0
-        );
-        const tax = subtotal * TAX_RATE;
-        const total = subtotal + tax;
-        const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
-
         set({
-          items,
-          subtotal,
-          tax,
-          total,
-          itemCount,
+          items: get().items.map(item =>
+            item.id === itemId ? { ...item, quantity } : item
+          ),
         });
       },
 
       clearCart: () =>
-        set({
-          items: [],
-          subtotal: 0,
-          tax: 0,
-          total: 0,
-          itemCount: 0,
-        }),
+        set({ items: [] }),
 
       toggleCart: () =>
         set(state => ({ isOpen: !state.isOpen })),
@@ -172,7 +124,6 @@ export const useCartStore = create<CartState>()(
       partialize: (state) => ({
         items: state.items,
       }),
-      skipHydration: true,
     }
   )
 );

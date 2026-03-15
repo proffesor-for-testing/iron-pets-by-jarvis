@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMemo } from 'react';
 import { api } from '@/lib/api';
-import { useCartStore } from '@/store/cart';
+import { useCartStore, getCartTotals } from '@/store/cart';
 
 export function useShippingRates(zipCode?: string) {
   const items = useCartStore((state) => state.items);
@@ -21,7 +22,7 @@ export function useShippingRates(zipCode?: string) {
 
 export function useCreatePaymentIntent() {
   const items = useCartStore((state) => state.items);
-  const subtotal = useCartStore((state) => state.subtotal);
+  const { subtotal } = useMemo(() => getCartTotals(items), [items]);
 
   return useMutation({
     mutationFn: async (data: {
@@ -53,7 +54,7 @@ export function useCreatePayment() {
 export function useConfirmOrder() {
   const queryClient = useQueryClient();
   const items = useCartStore((state) => state.items);
-  const subtotal = useCartStore((state) => state.subtotal);
+  const { subtotal } = useMemo(() => getCartTotals(items), [items]);
   const clearCart = useCartStore((state) => state.clearCart);
 
   return useMutation({

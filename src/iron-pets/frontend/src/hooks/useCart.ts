@@ -1,14 +1,17 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useCartStore, CartItem } from '@/store/cart';
+import { useMemo } from 'react';
+import { useCartStore, CartItem, getCartTotals } from '@/store/cart';
 
 // Hook to get cart state directly from store
+// Totals are derived from items — always consistent after hydration
 export function useCart() {
   const items = useCartStore((state) => state.items);
-  const itemCount = useCartStore((state) => state.itemCount);
-  const subtotal = useCartStore((state) => state.subtotal);
-  const tax = useCartStore((state) => state.tax);
-  const total = useCartStore((state) => state.total);
   const isOpen = useCartStore((state) => state.isOpen);
+
+  const { subtotal, tax, total, itemCount } = useMemo(
+    () => getCartTotals(items),
+    [items]
+  );
 
   // Free shipping for orders over $50
   const shipping = subtotal >= 50 ? 0 : 5.99;
