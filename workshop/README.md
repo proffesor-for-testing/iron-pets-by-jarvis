@@ -1,6 +1,16 @@
 # Workshop Level 1 — controlled workshop baseline
 
 
+## Training versions
+
+Use the [participant branch](https://github.com/proffesor-for-testing/iron-pets-by-jarvis/tree/workshop/participants)
+for the assigned cart exercise and the [instructor branch](https://github.com/proffesor-for-testing/iron-pets-by-jarvis/tree/workshop/instructor)
+for the solution after debrief. General main keeps the working validation behavior.
+Record the exact `git rev-parse HEAD`; use the pinned participant revision supplied
+for your session. The participant cart check is expected to fail while setup and
+Button tests pass. Instructor answers remain separate from learner instructions.
+Dates, venue and customer-specific delivery material belong outside this reusable repository.
+
 ## Prepare before the workshop
 
 Use a new training clone, Node **22**, npm, Git, and the company's approved
@@ -14,7 +24,7 @@ devcontainer setup for this path.
 ```bash
 git clone https://github.com/proffesor-for-testing/iron-pets-by-jarvis.git workshop-iron-pets
 cd workshop-iron-pets
-# Check out the full approved merge SHA supplied with the participant pack.
+# Check out the approved participant SHA supplied for your workshop.
 git switch --detach <participant-sha-from-checklist>
 git rev-parse HEAD
 node --version
