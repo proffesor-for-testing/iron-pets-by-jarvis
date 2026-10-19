@@ -1,7 +1,5 @@
-# Sixsentix Level 1 — controlled workshop baseline
+# Workshop Level 1 — controlled workshop baseline
 
-**21 October 2026, 15:00–19:00 Europe/Belgrade. 4 November repeats Level 1
-for the second group. Level 2 is an optional future topic.**
 
 ## Prepare before the workshop
 
@@ -14,8 +12,8 @@ for the mandatory baseline below. Do not run root `start.sh` or the privileged
 devcontainer setup for this path.
 
 ```bash
-git clone https://github.com/proffesor-for-testing/iron-pets-by-jarvis.git sixsentix-iron-pets
-cd sixsentix-iron-pets
+git clone https://github.com/proffesor-for-testing/iron-pets-by-jarvis.git workshop-iron-pets
+cd workshop-iron-pets
 # Check out the full approved merge SHA supplied with the participant pack.
 git switch --detach <participant-sha-from-checklist>
 git rev-parse HEAD
