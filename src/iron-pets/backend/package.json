@@ -20,7 +20,8 @@
     "db:studio": "prisma studio",
     "db:migrate": "prisma migrate dev",
     "db:reset": "prisma migrate reset",
-    "test:contracts": "jest --config jest.workshop.config.js --runInBand"
+    "test:contracts": "jest --config jest.workshop.config.js --runInBand",
+    "test:contracts:core": "jest --config jest.workshop.config.js --runInBand --runTestsByPath tests/workshop/contracts.test.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.7.1",

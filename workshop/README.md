@@ -17,7 +17,7 @@ devcontainer setup for this path.
 git clone https://github.com/proffesor-for-testing/iron-pets-by-jarvis.git sixsentix-iron-pets
 cd sixsentix-iron-pets
 # Check out the full approved merge SHA supplied with the participant pack.
-git switch --detach <approved-merge-sha>
+git switch --detach <participant-sha-from-checklist>
 git rev-parse HEAD
 node --version
 npm run workshop:setup
@@ -25,8 +25,7 @@ npm run workshop:check
 npm run workshop:rehearse
 ```
 
-The placeholder is deliberately not an invented revision. The delivered pack
-must supply the final merged SHA, and participants should record their actual
+The checklist supplies a pinned participant training SHA (not general main), and participants should record their actual
 `git rev-parse HEAD`. The setup script uses lockfile-based installs with lifecycle
 scripts disabled, then explicitly generates Prisma and builds/installs bcrypt's
 native binding in the clone. Network access to npm, Prisma binaries and bcrypt's
@@ -36,7 +35,7 @@ normal build/install support. macOS and CI acceptance are recorded in the final
 facilitator receipt; other platforms are not implicitly certified.
 
 `workshop:check` runs frontend component tests, typecheck and lint, backend build,
-legacy tests and **13 HTTP contract tests with database IO mocked**. Warnings,
+legacy tests and **7 core HTTP contract tests with database IO mocked**. Warnings,
 TODOs and skipped legacy tests are visible; green does not mean full application
 coverage. The 52-test Button file is the fast exercise baseline:
 
@@ -50,7 +49,9 @@ from `src/iron-pets/frontend`.
 
 ## Exercise boundaries
 
-The normal baseline has **no deliberately planted broken application code**.
+General main has no deliberately planted application defect. The dedicated
+participant branch contains one selected cart-validation defect; its expected
+red exercise check is separate from the green setup gate.
 `workshop:rehearse` first checks the baseline, temporarily removes the Button's
 loading-disable condition, expects failing tests, restores the exact original
 bytes in `finally`, and requires a passing rerun. Run it only in the training
@@ -70,7 +71,7 @@ is required.
   `workshop/hooks/test.cjs`. From the clone root, opt into only that explicit file:
 
   ```bash
-  claude --setting-sources '' --strict-mcp-config --settings "$PWD/workshop/claude-settings.json"
+  claude --setting-sources= --strict-mcp-config --settings "$PWD/workshop/claude-settings.json"
   ```
 
   Managed policy can still apply; this is not a security sandbox. Inspect
@@ -90,8 +91,9 @@ Never copy global hook settings or bypass permissions to complete an exercise.
 
 ## Known gaps, not claimed seeded bugs
 
-The audit found accidental catalog alias/validation contract failures, now
-covered by HTTP regression tests. Do not label the other defects “intentional”.
+The earlier audit found catalog alias and validation contract failures. A dedicated
+participant training branch selectively restores one cart-validation defect; general
+main remains fixed. Other defects are not claimed to be historically intentional.
 Legacy backend tests include many skipped or fixture-only examples. Eleven
 assertion-free frontend proposals are explicit TODOs rather than green tests.
 The frontend's local cart and server cart are not proven equivalent. Development
@@ -133,3 +135,62 @@ running host/session. Do not change organization security settings for a demo.
 Total 240 minutes. Learner/spoken timing, licenses, projector/QR and venue
 network remain human acceptance checks. Resolve setup before 15:00; pair learners
 if access fails rather than taking time from the fixed first/fifth blocks.
+
+
+## Windows and the no-database cart exercise
+
+In Windows PowerShell or CMD, use `npm.cmd` for every `npm` command here:
+
+```powershell
+npm.cmd --version
+npm.cmd run workshop:setup
+npm.cmd run workshop:check
+npm.cmd run workshop:rehearse
+npm.cmd run workshop:cart
+npm.cmd run workshop:accept
+```
+
+The scripts select npm.cmd internally on Windows. Do not change execution policy,
+credentials or organization settings. The live hook command above assumes an
+already approved Git Bash shell: `$PWD` and `$CLAUDE_PROJECT_DIR` must resolve there.
+A working native Claude CLI alone does not establish that shell compatibility.
+Inspect /hooks in the actual session; otherwise use `workshop:rehearse`, which
+calls the handler directly and does not consume model quota. Do not install a
+shell or relax policy just for this demo. Windows CI checks Node scripts/tests,
+not VS Code, licensing, corporate proxy or automatic Claude dispatch.
+
+If backend bcrypt native setup fails, the frontend-only fallback is:
+
+```powershell
+npm.cmd --prefix src/iron-pets/frontend ci --ignore-scripts --no-audit --no-fund
+npm.cmd --prefix src/iron-pets/frontend run test:workshop
+node workshop/rehearse.cjs
+```
+
+That fallback supports Button/handler only, not the backend/cart exercise or full
+setup acceptance. Pair for cart or use facilitator evidence if backend is unavailable.
+
+Run `workshop:cart` in the assigned training revision. It checks five explicit
+request contracts using actual middleware and schemas, with no database or HTTP
+listener. A nonzero result is expected on the assigned participant baseline;
+it is exercise evidence, not an installation failure. Record expected versus
+actual, propose 3–5 focused tests and investigate before changing behavior.
+Button/mutation remains the prepared core and fallback. Repair only the assigned
+behavior; preserve unrelated defects. No root-cause patch is included in learner
+instructions. `workshop:accept` distinguishes the expected red exercise from a
+failed setup; it does not turn failed behavior into a product pass.
+
+Reset ONLY the cart exercise file with `npm.cmd run workshop:cart:reset`
+(or npm on macOS/Linux). It restores that file from the current HEAD and keeps
+edited bytes in `.workshop-cart-backup`. It refuses to overwrite an existing
+backup. Inspect/move that backup yourself before another edited reset; never
+use a blanket reset/clean. Running reset on an unchanged file is a no-op.
+The Button script independently backs up/restores its exact source bytes.
+
+PostgreSQL **15+** is optional only if the instructor explicitly chooses a separate
+DB-backed exercise. A company-approved native PostgreSQL installation can be
+used; Docker Desktop is not required. Do not substitute SQLite in the PostgreSQL
+Prisma schema, use real service keys, or run database reset commands for Level 1.
+
+See the current checklist for exact participant SHA and facilitator acceptance
+for measured platforms. No native Windows acceptance is claimed from source review.

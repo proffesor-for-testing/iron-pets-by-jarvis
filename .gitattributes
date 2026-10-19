@@ -1,0 +1,3 @@
+
+# Keep the single-file exercise reset byte-stable on Windows.
+src/iron-pets/backend/src/middleware/validate.ts text eol=lf

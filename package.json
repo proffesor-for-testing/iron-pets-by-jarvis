@@ -4,7 +4,12 @@
   "scripts": {
     "workshop:setup": "node workshop/setup.cjs",
     "workshop:check": "node workshop/check.cjs",
-    "workshop:rehearse": "node workshop/rehearse.cjs"
+    "workshop:rehearse": "node workshop/rehearse.cjs",
+    "workshop:cart": "node workshop/cart-check.cjs",
+    "workshop:cart:reset": "node workshop/cart-reset.cjs",
+    "workshop:accept": "node workshop/accept.cjs"
   },
-  "engines": { "node": "22.x" }
+  "engines": {
+    "node": "22.x"
+  }
 }

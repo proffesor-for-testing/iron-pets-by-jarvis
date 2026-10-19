@@ -8,7 +8,7 @@ for (const [part, args] of [
   ['frontend', ['run', 'lint', '--', '--no-cache']],
   ['backend', ['run', 'build']],
   ['backend', ['run', 'test:unit']],
-  ['backend', ['run', 'test:contracts']],
+  ['backend', ['run', 'test:contracts:core']],
 ]) {
   const result = spawnSync(npm, args, { cwd: path.join(root, 'src/iron-pets', part), stdio: 'inherit', shell: process.platform === 'win32' });
   if (result.error) throw result.error;
