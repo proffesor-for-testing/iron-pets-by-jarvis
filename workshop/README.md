@@ -1,7 +1,15 @@
-# Sixsentix Level 1 — INSTRUCTOR SOLUTION (do not distribute before debrief)
+# Workshop Level 1 — INSTRUCTOR SOLUTION (do not distribute before debrief)
 
-**21 October 2026, 15:00–19:00 Europe/Belgrade. 4 November repeats Level 1
-for the second group. Level 2 is an optional future topic.**
+
+## Training versions
+
+Use the [participant branch](https://github.com/proffesor-for-testing/iron-pets-by-jarvis/tree/workshop/participants)
+for the assigned cart exercise and the [instructor branch](https://github.com/proffesor-for-testing/iron-pets-by-jarvis/tree/workshop/instructor)
+for the solution after debrief. General main keeps the working validation behavior.
+Record the exact `git rev-parse HEAD`; use the pinned participant revision supplied
+for your session. The participant cart check is expected to fail while setup and
+Button tests pass. Instructor answers remain separate from learner instructions.
+Dates, venue and customer-specific delivery material belong outside this reusable repository.
 
 ## Prepare before the workshop
 
@@ -14,9 +22,9 @@ for the mandatory baseline below. Do not run root `start.sh` or the privileged
 devcontainer setup for this path.
 
 ```bash
-git clone https://github.com/proffesor-for-testing/iron-pets-by-jarvis.git sixsentix-iron-pets
-cd sixsentix-iron-pets
-# Check out the full approved merge SHA supplied with the participant pack.
+git clone https://github.com/proffesor-for-testing/iron-pets-by-jarvis.git workshop-iron-pets
+cd workshop-iron-pets
+# Check out the approved participant SHA supplied for your workshop.
 git switch --detach <participant-sha-from-checklist>
 git rev-parse HEAD
 node --version
@@ -123,17 +131,17 @@ an explicitly labeled walkthrough. No provider spending is authorized by these
 scripts. Remote Control also requires the eligible account/org approval and a
 running host/session. Do not change organization security settings for a demo.
 
-| Belgrade time | Activity | Minutes |
+| Elapsed time | Activity | Minutes |
 |---|---|---:|
-| 15:00–15:30 | Prompting/personalization, including opening/setup | 30 |
-| 15:30–16:15 | Context | 45 |
-| 16:15–16:30 | Break | 15 |
-| 16:30–17:45 | Agents, skill, hook, demo/design | 75 |
-| 17:45–18:30 | Practicum 35 + debrief 10 | 45 |
-| 18:30–19:00 | Fleet evidence demo/walkthrough 20 + Q&A 7 + close 3 | 30 |
+| 0:00–0:30 | Prompting/personalization, including opening/setup | 30 |
+| 0:30–1:15 | Context | 45 |
+| 1:15–1:30 | Break | 15 |
+| 1:30–2:45 | Agents, skill, hook, demo/design | 75 |
+| 2:45–3:30 | Practicum 35 + debrief 10 | 45 |
+| 3:30–4:00 | Fleet evidence demo/walkthrough 20 + Q&A 7 + close 3 | 30 |
 
 Total 240 minutes. Learner/spoken timing, licenses, projector/QR and venue
-network remain human acceptance checks. Resolve setup before 15:00; pair learners
+network remain human acceptance checks. Resolve setup before the session; pair learners
 if access fails rather than taking time from the fixed first/fifth blocks.
 
 
