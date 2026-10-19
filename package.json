@@ -1,0 +1,10 @@
+{
+  "name": "iron-pets-workshop",
+  "private": true,
+  "scripts": {
+    "workshop:setup": "node workshop/setup.cjs",
+    "workshop:check": "node workshop/check.cjs",
+    "workshop:rehearse": "node workshop/rehearse.cjs"
+  },
+  "engines": { "node": "22.x" }
+}

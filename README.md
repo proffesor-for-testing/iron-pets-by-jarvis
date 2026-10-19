@@ -1,5 +1,12 @@
 # Iron Pets
 
+## Sixsentix workshop
+
+Start with [the controlled Level 1 participant path](workshop/README.md).
+It requires no database, Docker, provider call or inherited hook. Use the final
+merge SHA supplied in the participant pack. Historical app setup below is optional.
+
+
 A modern e-commerce platform for pet supplies built with Next.js and Node.js/Express.
 
 ## Overview
@@ -19,14 +26,14 @@ Iron Pets is a full-stack pet store application featuring product browsing, shop
 ## Tech Stack
 
 ### Frontend
-- **Framework**: Next.js 14 with TypeScript
+- **Framework**: Next.js 15.5.10 with TypeScript
 - **Styling**: Tailwind CSS
 - **State Management**: Zustand + React Query
 - **Forms**: React Hook Form + Zod validation
 - **Testing**: Jest, React Testing Library, Playwright (E2E)
 
 ### Backend
-- **Runtime**: Node.js 20 LTS
+- **Runtime**: Node.js 22
 - **Framework**: Express.js
 - **Database**: PostgreSQL 15+ with Prisma ORM
 - **Authentication**: JWT (access + refresh tokens)
@@ -73,7 +80,7 @@ iron-pets-by-jarvis/
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/iron-pets-by-jarvis.git
+   git clone https://github.com/proffesor-for-testing/iron-pets-by-jarvis.git
    cd iron-pets-by-jarvis
    ```
 
@@ -94,8 +101,8 @@ iron-pets-by-jarvis/
    Backend (`src/iron-pets/backend/.env`):
    ```env
    DATABASE_URL="postgresql://user:password@localhost:5432/iron_pets"
-   JWT_SECRET="your-jwt-secret"
-   JWT_REFRESH_SECRET="your-refresh-secret"
+   JWT_SECRET="local-training-only-secret-minimum-32-characters"
+   JWT_REFRESH_SECRET="local-training-only-refresh-minimum-32-characters"
    STRIPE_SECRET_KEY="sk_test_..."
    REDIS_URL="redis://localhost:6379"
    ```

@@ -1,6 +1,12 @@
+# Workshop entry point
+
+For Sixsentix Level 1 use `workshop/README.md`. The mandatory baseline is
+component-only: no database, providers, MCP or inherited hooks. AQE guidance below
+is optional reference, not a requirement to initialize a fleet for exercises.
+
 # Iron Pets - Project Guide
 
-A full-stack e-commerce platform for pet supplies built with Next.js 14 and Express.js.
+A full-stack e-commerce platform for pet supplies built with Next.js 15.5.10 and Express.js.
 
 ---
 
@@ -22,7 +28,7 @@ src/iron-pets/
 │   │   ├── types/           # api.types, domain.types, express.d
 │   │   └── utils/           # jwt.service, email.service
 │   └── tests/               # Jest tests (auth, cart, catalog, checkout, orders, pets, search, user)
-└── frontend/                # Next.js 14 app (port 3000)
+└── frontend/                # Next.js 15.5.10 app (port 3000)
     ├── src/
     │   ├── app/             # App Router pages (see below)
     │   ├── components/      # React components
@@ -61,7 +67,7 @@ Each module follows: `controller.ts` / `service.ts` / `routes.ts` / `validation.
 ## Tech Stack
 
 - **Backend**: Express.js, TypeScript, Prisma ORM, PostgreSQL 15+, Redis, Stripe, Zod, JWT (bcrypt)
-- **Frontend**: Next.js 14, React 18, TypeScript, Tailwind CSS, Zustand, React Query, React Hook Form, Axios
+- **Frontend**: Next.js 15.5.10, React 18, TypeScript, Tailwind CSS, Zustand, React Query, React Hook Form, Axios
 - **Testing**: Jest (backend + frontend unit), Playwright (E2E with 6 browser/device configs)
 
 ## Key Commands
@@ -71,9 +77,9 @@ Each module follows: `controller.ts` / `service.ts` / `routes.ts` / `validation.
 ```bash
 npm run dev              # Dev server with hot reload
 npm run build            # Build (tsc)
-npm test -- --run        # Run tests (ALWAYS use --run flag)
-npm run test:unit        # Unit tests only
-npm run test:integration # Integration tests only
+npm test -- --runInBand --watch=false        # Run tests (use explicit non-watch Jest flags)
+npm run test:unit        # Legacy test suite (includes skipped/fixture examples)
+npm run test:contracts # Workshop HTTP contracts (database IO mocked)
 npm run test:coverage    # Tests with coverage report
 npm run db:generate      # Generate Prisma client
 npm run db:push          # Push schema to database
@@ -87,7 +93,7 @@ npm run db:studio        # Open Prisma Studio
 ```bash
 npm run dev              # Dev server
 npm run build            # Production build
-npm test -- --run        # Unit tests (ALWAYS use --run flag)
+npm test -- --runInBand --watch=false        # Unit tests (use explicit non-watch Jest flags)
 npm run test:coverage    # Tests with coverage
 npm run typecheck        # TypeScript check (tsc --noEmit)
 npm run lint             # ESLint
@@ -98,7 +104,7 @@ npm run test:e2e:headed  # E2E in headed browser
 
 ## Database
 
-**13 Prisma models**: User, UserProfile, Address, Pet, Category, Brand, Product, ProductImage, Cart, CartItem, Order, OrderItem, PromoCode (+ RefreshToken, PasswordResetToken)
+**15 Prisma models**: User, UserProfile, Address, Pet, Category, Brand, Product, ProductImage, Cart, CartItem, Order, OrderItem, PromoCode (+ RefreshToken, PasswordResetToken)
 
 **Schema**: `src/iron-pets/backend/prisma/schema.prisma`
 
@@ -137,8 +143,8 @@ This project uses **Agentic QE v3** - a Domain-Driven Quality Engineering platfo
 **We value the quality we deliver to our users.**
 
 #### Test Execution
-- NEVER run `npm test` without `--run` flag (watch mode risk)
-- Use: `npm test -- --run`, `npm run test:unit`, `npm run test:integration` when available
+- NEVER run `npm test` without an explicit non-watch configuration (watch mode risk)
+- Use: `npm test -- --runInBand --watch=false`, `npm run test:unit`, `npm run test:contracts` when available
 
 #### Data Protection
 - NEVER run `rm -f` on `.agentic-qe/` or `*.db` files without confirmation
@@ -154,7 +160,7 @@ This project uses **Agentic QE v3** - a Domain-Driven Quality Engineering platfo
 
 ```bash
 # Run tests
-npm test -- --run
+npm test -- --runInBand --watch=false
 
 # Check quality
 aqe quality assess

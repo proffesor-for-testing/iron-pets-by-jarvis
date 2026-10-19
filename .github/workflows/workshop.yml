@@ -1,0 +1,21 @@
+name: Workshop baseline
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  workshop:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install reviewed dependencies
+        run: npm run workshop:setup
+      - name: Component, HTTP contract and legacy tests
+        run: npm run workshop:check
+      - name: Reversible mutation and hook handler
+        run: npm run workshop:rehearse

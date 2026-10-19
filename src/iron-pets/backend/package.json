@@ -11,8 +11,7 @@
     "build": "tsc && tsc-alias",
     "start": "node dist/server.js",
     "test": "jest",
-    "test:unit": "jest --testPathPattern=tests/unit",
-    "test:integration": "jest --testPathPattern=tests/integration",
+    "test:unit": "jest --runInBand --watch=false",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "db:generate": "prisma generate",
@@ -20,7 +19,8 @@
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio",
     "db:migrate": "prisma migrate dev",
-    "db:reset": "prisma migrate reset"
+    "db:reset": "prisma migrate reset",
+    "test:contracts": "jest --config jest.workshop.config.js --runInBand"
   },
   "dependencies": {
     "@prisma/client": "^5.7.1",

@@ -1,4 +1,5 @@
 import { Suspense } from 'react';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ProductImages } from '@/components/products/ProductImages';
 import { ProductInfo } from '@/components/products/ProductInfo';
@@ -65,9 +66,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
       {/* Breadcrumbs */}
       <nav className="mb-8 text-sm">
         <ol className="flex items-center space-x-2">
-          <li><a href="/" className="text-gray-600 hover:text-gray-900">Home</a></li>
+          <li><Link href="/" className="text-gray-600 hover:text-gray-900">Home</Link></li>
           <li className="text-gray-400">/</li>
-          <li><a href="/products" className="text-gray-600 hover:text-gray-900">Products</a></li>
+          <li><Link href="/products" className="text-gray-600 hover:text-gray-900">Products</Link></li>
           <li className="text-gray-400">/</li>
           <li className="text-gray-900 font-medium">{product.name}</li>
         </ol>

@@ -1,8 +1,8 @@
 /**
- * AddToCartButton Component Tests - TDD RED Phase
+ * AddToCartButton Component Tests - component contract
  *
- * Test-Driven Development - Failing Tests (RED Phase)
- * These tests define expected behavior BEFORE implementation exists
+ * Test-Driven Development - Component behavior
+ * Active tests exercise the component; unfinished proposals are explicit TODOs.
  *
  * Component: AddToCartButton
  * Purpose: E-commerce add-to-cart functionality with quantity selector
@@ -59,7 +59,7 @@ jest.mock('@/hooks/useToast', () => ({
 // TEST SETUP
 // ============================================================================
 
-describe('AddToCartButton Component - TDD RED Phase', () => {
+describe('AddToCartButton Component - component contract', () => {
   // Test fixtures
   const mockProduct = {
     id: 'prod-123',
@@ -238,7 +238,7 @@ describe('AddToCartButton Component - TDD RED Phase', () => {
 
       // THEN: Loading state visible
       expect(screen.getByText(/adding/i)).toBeInTheDocument();
-      const button = screen.getByRole('button');
+      const button = screen.getByRole('button', { name: /add to cart|adding|out of stock/i });
       expect(button).toBeDisabled();
 
       // Spinner should be visible
@@ -366,7 +366,7 @@ describe('AddToCartButton Component - TDD RED Phase', () => {
 
       // THEN: Low stock warning visible (component should show this)
       // Note: This test will fail until component implements low stock warning
-      const button = screen.getByRole('button');
+      const button = screen.getByRole('button', { name: /add to cart|adding|out of stock/i });
       expect(button).not.toBeDisabled();
     });
 
@@ -407,33 +407,9 @@ describe('AddToCartButton Component - TDD RED Phase', () => {
       });
     });
 
-    test('should show "Only X left" message for low stock items', () => {
-      // GIVEN: Low stock product
-      renderWithProviders(<AddToCartButton product={lowStockProduct} />);
+    test.todo('should show "Only X left" message for low stock items');
 
-      // THEN: Specific count message displayed
-      // This test will fail until component implements this feature
-      // Expected: "Only 3 left in stock"
-    });
-
-    test('should update stock display when stock changes', () => {
-      // GIVEN: Product with initial stock
-      const { rerender } = renderWithProviders(
-        <AddToCartButton product={mockProduct} />
-      );
-
-      // WHEN: Stock updated (e.g., another user purchased)
-      const updatedProduct = { ...mockProduct, stock: 2 };
-      rerender(
-        <QueryClientProvider client={queryClient}>
-          <AddToCartButton product={updatedProduct} />
-        </QueryClientProvider>
-      );
-
-      // THEN: UI reflects new stock level
-      const incrementButton = screen.getAllByRole('button')[1];
-      // Should allow incrementing to max 2
-    });
+    test.todo('should update stock display when stock changes');
 
     test('should handle stock becoming 0 during transaction', async () => {
       // GIVEN: Product with 1 in stock
@@ -527,77 +503,13 @@ describe('AddToCartButton Component - TDD RED Phase', () => {
       expect(incrementButton).toBeDisabled();
     });
 
-    test('should handle direct input of quantity', async () => {
-      // GIVEN: Quantity selector with input field
-      const user = userEvent.setup();
+    test.todo('should handle direct input of quantity');
 
-      // Note: Current component doesn't support direct input
-      // This test will fail until feature is implemented
-      renderWithProviders(<AddToCartButton product={mockProduct} />);
+    test.todo('should reject invalid direct input (non-numeric)');
 
-      // WHEN: User types quantity directly
-      // const quantityInput = screen.getByRole('spinbutton', { name: /quantity/i });
-      // await user.clear(quantityInput);
-      // await user.type(quantityInput, '7');
+    test.todo('should show quantity in button text (optional feature)');
 
-      // THEN: Quantity updates to 7
-      // expect(quantityInput).toHaveValue(7);
-    });
-
-    test('should reject invalid direct input (non-numeric)', async () => {
-      // GIVEN: Quantity input field
-      const user = userEvent.setup();
-
-      // This test will fail until direct input is implemented
-      renderWithProviders(<AddToCartButton product={mockProduct} />);
-
-      // WHEN: User types non-numeric value
-      // const quantityInput = screen.getByRole('spinbutton');
-      // await user.clear(quantityInput);
-      // await user.type(quantityInput, 'abc');
-
-      // THEN: Input rejected, reverts to 1
-      // expect(quantityInput).toHaveValue(1);
-    });
-
-    test('should show quantity in button text (optional feature)', async () => {
-      // GIVEN: Quantity at 5
-      const user = userEvent.setup();
-      renderWithProviders(<AddToCartButton product={mockProduct} />);
-
-      const incrementButton = screen.getAllByRole('button')[1];
-      await user.click(incrementButton);
-      await user.click(incrementButton);
-      await user.click(incrementButton);
-      await user.click(incrementButton); // Now at 5
-
-      // THEN: Button text includes quantity
-      // This is optional - will fail if not implemented
-      // expect(screen.getByRole('button', { name: /add 5 to cart/i })).toBeInTheDocument();
-    });
-
-    test('should reset quantity to 1 after successful add (optional)', async () => {
-      // GIVEN: Quantity at 5
-      const user = userEvent.setup();
-      mockAddToCart.mockResolvedValue({ success: true });
-
-      renderWithProviders(<AddToCartButton product={mockProduct} />);
-
-      const incrementButton = screen.getAllByRole('button')[1];
-      await user.click(incrementButton);
-      await user.click(incrementButton);
-      await user.click(incrementButton);
-      await user.click(incrementButton); // At 5
-
-      // WHEN: User adds to cart
-      await user.click(screen.getByRole('button', { name: /add to cart/i }));
-
-      // THEN: Quantity resets to 1
-      // This is optional behavior - will fail if not implemented
-      // await waitFor(() => {
-      //   expect(screen.getByText('1')).toBeInTheDocument();
-      // });
-    });
+    test.todo('should reset quantity to 1 after successful add (optional)');
   });
 
   // ============================================================================
@@ -617,7 +529,7 @@ describe('AddToCartButton Component - TDD RED Phase', () => {
       renderWithProviders(<AddToCartButton product={mockProduct} />);
 
       // THEN: Button disabled
-      const button = screen.getByRole('button');
+      const button = screen.getByRole('button', { name: /add to cart|adding|out of stock/i });
       expect(button).toBeDisabled();
     });
 
@@ -633,30 +545,13 @@ describe('AddToCartButton Component - TDD RED Phase', () => {
       renderWithProviders(<AddToCartButton product={mockProduct} />);
 
       // THEN: Spinner visible
-      const button = screen.getByRole('button');
+      const button = screen.getByRole('button', { name: /add to cart|adding|out of stock/i });
       const spinner = button.querySelector('svg.animate-spin');
       expect(spinner).toBeInTheDocument();
       expect(screen.getByText(/adding/i)).toBeInTheDocument();
     });
 
-    test('should disable quantity controls during loading', () => {
-      // GIVEN: Loading state
-      mockUseAddToCart.mockReturnValue({
-        mutate: mockAddToCart,
-        isPending: true,
-        isError: false,
-        error: null,
-      });
-
-      renderWithProviders(<AddToCartButton product={mockProduct} />);
-
-      // THEN: Quantity buttons should be disabled
-      // This test will fail until feature is implemented
-      // const incrementButton = screen.getAllByRole('button')[1];
-      // const decrementButton = screen.getAllByRole('button')[0];
-      // expect(incrementButton).toBeDisabled();
-      // expect(decrementButton).toBeDisabled();
-    });
+    test.todo('should disable quantity controls during loading');
 
     test('should restore normal state after loading completes', async () => {
       // GIVEN: Initial loading state
@@ -740,15 +635,7 @@ describe('AddToCartButton Component - TDD RED Phase', () => {
       });
     });
 
-    test('should handle cart merge on login (optional feature)', async () => {
-      // GIVEN: Guest cart exists, user logs in
-      // This test will fail until cart merge is implemented
-
-      // WHEN: User logs in with existing guest cart
-
-      // THEN: Prompt to merge carts shown
-      // expect(screen.getByText(/merge carts/i)).toBeInTheDocument();
-    });
+    test.todo('should handle cart merge on login (optional feature)');
 
     test('should persist cart across page refreshes', async () => {
       // GIVEN: User added items to cart
@@ -797,13 +684,11 @@ describe('AddToCartButton Component - TDD RED Phase', () => {
       // WHEN: User navigates with Tab key
       await user.tab();
 
-      // THEN: First button (decrement) receives focus
-      const decrementButton = screen.getAllByRole('button')[0];
-      expect(decrementButton).toHaveFocus();
-
-      // Continue tabbing through all controls
-      await user.tab(); // Increment button
-      await user.tab(); // Add to cart button
+      // Disabled decrement at quantity 1 is skipped by keyboard navigation.
+      expect(screen.getByRole('button', { name: /decrease quantity/i })).toBeDisabled();
+      expect(screen.getByRole('button', { name: /increase quantity/i })).toHaveFocus();
+      await user.tab();
+      expect(screen.getByRole('button', { name: /add to cart/i })).toHaveFocus();
     });
 
     test('should support keyboard activation with Enter and Space', async () => {
@@ -825,17 +710,7 @@ describe('AddToCartButton Component - TDD RED Phase', () => {
       });
     });
 
-    test('should have proper ARIA labels for quantity controls', () => {
-      // GIVEN: Quantity selector rendered
-      renderWithProviders(<AddToCartButton product={mockProduct} />);
-
-      // THEN: Buttons have descriptive labels
-      // This test will fail until ARIA labels are added
-      // const incrementButton = screen.getByRole('button', { name: /increase quantity/i });
-      // const decrementButton = screen.getByRole('button', { name: /decrease quantity/i });
-      // expect(incrementButton).toHaveAttribute('aria-label', 'Increase quantity');
-      // expect(decrementButton).toHaveAttribute('aria-label', 'Decrease quantity');
-    });
+    test.todo('should have proper ARIA labels for quantity controls');
 
     test('should announce loading state to screen readers', () => {
       // GIVEN: Loading state
@@ -849,10 +724,9 @@ describe('AddToCartButton Component - TDD RED Phase', () => {
       renderWithProviders(<AddToCartButton product={mockProduct} />);
 
       // THEN: Loading announced
-      const button = screen.getByRole('button');
-      // This test will fail until aria-busy is implemented
-      // expect(button).toHaveAttribute('aria-busy', 'true');
-      // expect(button).toHaveAttribute('aria-live', 'polite');
+      const button = screen.getByRole('button', { name: /add to cart|adding|out of stock/i });
+      expect(button).toHaveAttribute('aria-busy', 'true');
+      expect(button).toHaveAttribute('aria-live', 'polite');
     });
 
     test('should maintain focus management during state changes', async () => {
@@ -942,29 +816,7 @@ describe('AddToCartButton Component - TDD RED Phase', () => {
       expect(screen.getByText('51')).toBeInTheDocument();
     });
 
-    test('should handle component unmount during add operation', async () => {
-      // GIVEN: Add operation in progress
-      const user = userEvent.setup();
-      let resolveAdd: any;
-      mockAddToCart.mockImplementation(
-        () => new Promise(resolve => { resolveAdd = resolve; })
-      );
-
-      const { unmount } = renderWithProviders(
-        <AddToCartButton product={mockProduct} />
-      );
-
-      await user.click(screen.getByRole('button', { name: /add to cart/i }));
-
-      // WHEN: Component unmounts before completion
-      unmount();
-
-      // THEN: No memory leaks or errors
-      // Resolve the promise after unmount
-      resolveAdd({ success: true });
-
-      // Test passes if no errors thrown
-    });
+    test.todo('should handle component unmount during add operation');
   });
 
   // ============================================================================
@@ -972,23 +824,7 @@ describe('AddToCartButton Component - TDD RED Phase', () => {
   // ============================================================================
 
   describe('Integration with Cart System', () => {
-    test('should open cart drawer after successful add', async () => {
-      // GIVEN: Cart drawer closed
-      const user = userEvent.setup();
-      mockAddToCart.mockResolvedValue({ success: true });
-      const openCartSpy = jest.spyOn(mockCartStore, 'openCart');
-
-      renderWithProviders(<AddToCartButton product={mockProduct} />);
-
-      // WHEN: User adds product
-      await user.click(screen.getByRole('button', { name: /add to cart/i }));
-
-      // THEN: Cart drawer opens
-      // This test will fail until feature is implemented
-      // await waitFor(() => {
-      //   expect(openCartSpy).toHaveBeenCalled();
-      // });
-    });
+    test.todo('should open cart drawer after successful add');
 
     test('should update cart total immediately', async () => {
       // GIVEN: Cart with $50 total
