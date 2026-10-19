@@ -1,0 +1,135 @@
+# Sixsentix Level 1 — controlled workshop baseline
+
+**21 October 2026, 15:00–19:00 Europe/Belgrade. 4 November repeats Level 1
+for the second group. Level 2 is an optional future topic.**
+
+## Prepare before the workshop
+
+Use a new training clone, Node **22**, npm, Git, and the company's approved
+Claude Code license. VS Code is recommended; Claude Desktop and Copilot are
+optional. A GitHub account is not needed to clone this public repository.
+Do not install or sign in from an existing client project. No credentials,
+payment/email services, database, Docker, MCP server or provider call is needed
+for the mandatory baseline below. Do not run root `start.sh` or the privileged
+devcontainer setup for this path.
+
+```bash
+git clone https://github.com/proffesor-for-testing/iron-pets-by-jarvis.git sixsentix-iron-pets
+cd sixsentix-iron-pets
+# Check out the full approved merge SHA supplied with the participant pack.
+git switch --detach <approved-merge-sha>
+git rev-parse HEAD
+node --version
+npm run workshop:setup
+npm run workshop:check
+npm run workshop:rehearse
+```
+
+The placeholder is deliberately not an invented revision. The delivered pack
+must supply the final merged SHA, and participants should record their actual
+`git rev-parse HEAD`. The setup script uses lockfile-based installs with lifecycle
+scripts disabled, then explicitly generates Prisma and builds/installs bcrypt's
+native binding in the clone. Network access to npm, Prisma binaries and bcrypt's
+distribution may be required. It installs no global packages or host services.
+Use company-approved Node 22; native package behavior on Windows requires IT's
+normal build/install support. macOS and CI acceptance are recorded in the final
+facilitator receipt; other platforms are not implicitly certified.
+
+`workshop:check` runs frontend component tests, typecheck and lint, backend build,
+legacy tests and **13 HTTP contract tests with database IO mocked**. Warnings,
+TODOs and skipped legacy tests are visible; green does not mean full application
+coverage. The 52-test Button file is the fast exercise baseline:
+
+```bash
+npm --prefix src/iron-pets/frontend run test:workshop
+```
+
+The invalid Jest option `--run` must not be used. To run a file directly:
+`npm test -- --runInBand --watch=false tests/components/ui/Button.test.tsx`
+from `src/iron-pets/frontend`.
+
+## Exercise boundaries
+
+The normal baseline has **no deliberately planted broken application code**.
+`workshop:rehearse` first checks the baseline, temporarily removes the Button's
+loading-disable condition, expects failing tests, restores the exact original
+bytes in `finally`, and requires a passing rerun. Run it only in the training
+copy while nobody else is editing Button.tsx. It refuses to overwrite a source
+that already lacks the expected original expression. Save/commit your own work
+before experimentation; no `git reset --hard`, `git clean` or database deletion
+is required.
+
+- **Exercise 2.1:** audit existing CLAUDE.md against package files and executed
+  commands. It already exists; do not replace it with a blank template. Identify
+  a real gap, or add a verified command/result instead of inventing a stale fact.
+- **Exercise 3.3:** copy `workshop/skills/bug-report/SKILL.md` into
+  `.claude/skills/bug-report/SKILL.md` in your training copy, then invoke
+  `/bug-report`. Use the hypothetical Save/empty-email example; do not assert an
+  Iron Pets defect without reproduction. These project files are ignored by Git.
+- **Exercise 3.4:** review `workshop/claude-settings.json` and
+  `workshop/hooks/test.cjs`. From the clone root, opt into only that explicit file:
+
+  ```bash
+  claude --setting-sources '' --strict-mcp-config --settings "$PWD/workshop/claude-settings.json"
+  ```
+
+  Managed policy can still apply; this is not a security sandbox. Inspect
+  `/hooks` after launch. Make an allowed Edit/Write and inspect the output.
+  Bash/external edits are outside this scope. PostToolUse reports after an edit
+  and cannot undo it. `workshop:rehearse` verifies the handler by direct JSON stdin
+  invocation; it does **not** prove automatic Claude dispatch or consume model
+  quota. Live dispatch and skill invocation require the licensed human session.
+- **Exercise 4.1:** default feature is Button loading/disabled behavior. Design
+  3–5 behavior tests, run them, plant one reversible mutation, restore and rerun.
+  Database setup and payment flow are outside the mandatory 35-minute exercise.
+
+The initial reviewed launcher remains
+`claude --setting-sources user --strict-mcp-config`; user/managed rules can still
+apply, and it deliberately does not enable the workshop hook until opt-in.
+Never copy global hook settings or bypass permissions to complete an exercise.
+
+## Known gaps, not claimed seeded bugs
+
+The audit found accidental catalog alias/validation contract failures, now
+covered by HTTP regression tests. Do not label the other defects “intentional”.
+Legacy backend tests include many skipped or fixture-only examples. Eleven
+assertion-free frontend proposals are explicit TODOs rather than green tests.
+The frontend's local cart and server cart are not proven equivalent. Development
+mock email has an interface mismatch; browser account verification, checkout,
+order persistence and comprehensive E2E are not acceptance claims of this pack.
+Use these as investigation candidates, clearly separated from the controlled
+Button mutation. No authoritative seeded-bug list exists.
+
+## Optional full application
+
+Only use a separate local training PostgreSQL database. The earlier rehearsal
+used PostgreSQL 14.18 on a dedicated loopback port; the historical PostgreSQL 15+
+prerequisite and a clean DevPod build have not been accepted. Set DATABASE_URL
+explicitly, USE_MOCK_SERVICES=true, and matching backend port, frontend API URL
+and CORS origin. Do not copy real Stripe/SendGrid keys. Generate Prisma, push
+schema and seed **once** in that new database. Repeating the existing seed fails
+on duplicate slugs. To start over, create another disposable database name and
+seed it once; never reset an unknown or shared database. Full UI acceptance must
+be completed separately before using it as the default participant journey.
+
+## Offline fallback and delivery timing
+
+See [fallback/README.md](fallback/README.md). Saved test evidence is an offline
+verification exercise, not a claim that a live agent fleet or scheduled task ran.
+Schedule/remote/fleet demos require either an actual completed authorized run or
+an explicitly labeled walkthrough. No provider spending is authorized by these
+scripts. Remote Control also requires the eligible account/org approval and a
+running host/session. Do not change organization security settings for a demo.
+
+| Belgrade time | Activity | Minutes |
+|---|---|---:|
+| 15:00–15:30 | Prompting/personalization, including opening/setup | 30 |
+| 15:30–16:15 | Context | 45 |
+| 16:15–16:30 | Break | 15 |
+| 16:30–17:45 | Agents, skill, hook, demo/design | 75 |
+| 17:45–18:30 | Practicum 35 + debrief 10 | 45 |
+| 18:30–19:00 | Fleet evidence demo/walkthrough 20 + Q&A 7 + close 3 | 30 |
+
+Total 240 minutes. Learner/spoken timing, licenses, projector/QR and venue
+network remain human acceptance checks. Resolve setup before 15:00; pair learners
+if access fails rather than taking time from the fixed first/fifth blocks.

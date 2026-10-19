@@ -395,14 +395,10 @@ export function createApp(): Application {
   // ============================================
 
   // Direct product/category routes (aliases to catalog)
-  app.use(`${apiPrefix}/products`, catalogRoutes);
-  app.use(`${apiPrefix}/categories`, catalogRoutes);
-  app.use(`${apiPrefix}/brands`, catalogRoutes);
+  app.use(apiPrefix, catalogRoutes);
 
   // Also support without version prefix for simpler frontend URLs
-  app.use('/api/products', catalogRoutes);
-  app.use('/api/categories', catalogRoutes);
-  app.use('/api/brands', catalogRoutes);
+  app.use('/api', catalogRoutes);
   app.use('/api/cart', cartRoutes);
   app.use('/api/auth', authRoutes);
   app.use('/api/checkout', checkoutRoutes);

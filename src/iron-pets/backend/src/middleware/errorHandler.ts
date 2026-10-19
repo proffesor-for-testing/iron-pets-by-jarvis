@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { AppError } from '../common/errors';
 import { appConfig } from '../config/index';
 import { Prisma } from '@prisma/client';
+import { ZodError } from 'zod';
 
 /**
  * Global Error Handler Middleware
@@ -21,6 +22,14 @@ export function errorHandler(
     method: req.method,
     ip: req.ip,
   });
+
+  if (error instanceof ZodError) {
+    res.status(400).json({ success: false, error: {
+      code: 'VALIDATION_ERROR', message: 'Validation failed',
+      details: error.issues.map(issue => ({ field: issue.path.join('.'), message: issue.message })),
+    } });
+    return;
+  }
 
   // Handle known application errors
   if (error instanceof AppError) {
