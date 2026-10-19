@@ -110,3 +110,5 @@ temp/
 secrets/
 credentials/
 agentdb.db
+# Learner-preserving workshop reset backup
+*.workshop-cart-backup

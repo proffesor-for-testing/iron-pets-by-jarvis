@@ -2,12 +2,16 @@ name: Workshop baseline
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, workshop/sixsentix-participants, workshop/sixsentix-instructor]
 permissions:
   contents: read
 jobs:
   workshop:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -19,3 +23,8 @@ jobs:
         run: npm run workshop:check
       - name: Reversible mutation and hook handler
         run: npm run workshop:rehearse
+      - name: Cart exercise and repeatable reset (no database)
+        run: npm run workshop:accept
+      - name: Full reference contracts (baseline or instructor only)
+        if: github.ref != 'refs/heads/workshop/sixsentix-participants'
+        run: npm --prefix src/iron-pets/backend run test:contracts
