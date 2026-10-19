@@ -1,7 +1,15 @@
-# Sixsentix Level 1 — PARTICIPANT TRAINING VERSION
+# Workshop Level 1 — PARTICIPANT TRAINING VERSION
 
-**21 October 2026, 15:00–19:00 Europe/Belgrade. 4 November repeats Level 1
-for the second group. Level 2 is an optional future topic.**
+
+## Training versions
+
+Use the [participant branch](https://github.com/proffesor-for-testing/iron-pets-by-jarvis/tree/workshop/participants)
+for the assigned cart exercise and the [instructor branch](https://github.com/proffesor-for-testing/iron-pets-by-jarvis/tree/workshop/instructor)
+for the solution after debrief. General main keeps the working validation behavior.
+Record the exact `git rev-parse HEAD`; use the pinned participant revision supplied
+for your session. The participant cart check is expected to fail while setup and
+Button tests pass. Instructor answers remain separate from learner instructions.
+Dates, venue and customer-specific delivery material belong outside this reusable repository.
 
 ## Prepare before the workshop
 
@@ -14,9 +22,9 @@ for the mandatory baseline below. Do not run root `start.sh` or the privileged
 devcontainer setup for this path.
 
 ```bash
-git clone https://github.com/proffesor-for-testing/iron-pets-by-jarvis.git sixsentix-iron-pets
-cd sixsentix-iron-pets
-# Check out the full approved merge SHA supplied with the participant pack.
+git clone https://github.com/proffesor-for-testing/iron-pets-by-jarvis.git workshop-iron-pets
+cd workshop-iron-pets
+# Check out the approved participant SHA supplied for your workshop.
 git switch --detach <participant-sha-from-checklist>
 git rev-parse HEAD
 node --version

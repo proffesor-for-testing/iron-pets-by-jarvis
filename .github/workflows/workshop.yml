@@ -2,7 +2,7 @@ name: Workshop baseline
 on:
   pull_request:
   push:
-    branches: [main, workshop/sixsentix-participants, workshop/sixsentix-instructor]
+    branches: [main, workshop/participants, workshop/instructor]
 permissions:
   contents: read
 jobs:
@@ -26,5 +26,5 @@ jobs:
       - name: Cart exercise and repeatable reset (no database)
         run: npm run workshop:accept
       - name: Full reference contracts (baseline or instructor only)
-        if: github.ref != 'refs/heads/workshop/sixsentix-participants'
+        if: github.ref != 'refs/heads/workshop/participants'
         run: npm --prefix src/iron-pets/backend run test:contracts

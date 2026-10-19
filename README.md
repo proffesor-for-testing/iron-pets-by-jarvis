@@ -1,11 +1,5 @@
 # Iron Pets
 
-## Sixsentix workshop
-
-Start with [the controlled Level 1 participant path](workshop/README.md).
-It requires no database, Docker, provider call or inherited hook. Use the final
-merge SHA supplied in the participant pack. Historical app setup below is optional.
-
 
 A modern e-commerce platform for pet supplies built with Next.js and Node.js/Express.
 

@@ -1,6 +1,6 @@
 # Workshop entry point
 
-For Sixsentix Level 1 use `workshop/README.md`. The mandatory baseline is
+For the Level 1 workshop use `workshop/README.md`. The mandatory baseline is
 component-only: no database, providers, MCP or inherited hooks. AQE guidance below
 is optional reference, not a requirement to initialize a fleet for exercises.
 
