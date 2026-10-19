@@ -131,17 +131,17 @@ an explicitly labeled walkthrough. No provider spending is authorized by these
 scripts. Remote Control also requires the eligible account/org approval and a
 running host/session. Do not change organization security settings for a demo.
 
-| Belgrade time | Activity | Minutes |
+| Elapsed time | Activity | Minutes |
 |---|---|---:|
-| 15:00–15:30 | Prompting/personalization, including opening/setup | 30 |
-| 15:30–16:15 | Context | 45 |
-| 16:15–16:30 | Break | 15 |
-| 16:30–17:45 | Agents, skill, hook, demo/design | 75 |
-| 17:45–18:30 | Practicum 35 + debrief 10 | 45 |
-| 18:30–19:00 | Fleet evidence demo/walkthrough 20 + Q&A 7 + close 3 | 30 |
+| 0:00–0:30 | Prompting/personalization, including opening/setup | 30 |
+| 0:30–1:15 | Context | 45 |
+| 1:15–1:30 | Break | 15 |
+| 1:30–2:45 | Agents, skill, hook, demo/design | 75 |
+| 2:45–3:30 | Practicum 35 + debrief 10 | 45 |
+| 3:30–4:00 | Fleet evidence demo/walkthrough 20 + Q&A 7 + close 3 | 30 |
 
 Total 240 minutes. Learner/spoken timing, licenses, projector/QR and venue
-network remain human acceptance checks. Resolve setup before 15:00; pair learners
+network remain human acceptance checks. Resolve setup before the session; pair learners
 if access fails rather than taking time from the fixed first/fifth blocks.
 
 
