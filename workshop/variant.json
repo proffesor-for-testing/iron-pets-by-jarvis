@@ -1,4 +1,4 @@
 {
-  "variant": "participant",
-  "cartExpectedExit": 1
+  "variant": "instructor",
+  "cartExpectedExit": 0
 }

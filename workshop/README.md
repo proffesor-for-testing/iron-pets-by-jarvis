@@ -1,4 +1,4 @@
-# Sixsentix Level 1 — PARTICIPANT TRAINING VERSION
+# Sixsentix Level 1 — INSTRUCTOR SOLUTION (do not distribute before debrief)
 
 **21 October 2026, 15:00–19:00 Europe/Belgrade. 4 November repeats Level 1
 for the second group. Level 2 is an optional future topic.**
@@ -49,7 +49,7 @@ from `src/iron-pets/frontend`.
 
 ## Exercise boundaries
 
-This is the dedicated participant version. General main remains fixed. The dedicated
+This is the instructor solution. The dedicated
 participant branch contains one selected cart-validation defect; its expected
 red exercise check is separate from the green setup gate.
 `workshop:rehearse` first checks the baseline, temporarily removes the Button's
@@ -195,4 +195,4 @@ Prisma schema, use real service keys, or run database reset commands for Level 1
 See the current checklist for exact participant SHA and facilitator acceptance
 for measured platforms. No native Windows acceptance is claimed from source review.
 
-Participant cart baseline: the five contract checks produce 2 PASS / 3 FAIL and exit 1. That is the assigned observation; investigate without changing unrelated behavior. `workshop:check` remains green with 7 core contracts. Instructor answers are not part of this learner version.
+Instructor cart solution: all five direct checks pass (exit 0). The six cart reference tests are restored; all 13 HTTP contracts must pass. Use the private instructor guide below only after the debrief.

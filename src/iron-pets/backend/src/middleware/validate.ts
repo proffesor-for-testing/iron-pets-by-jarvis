@@ -13,11 +13,11 @@ import { ZodSchema, ZodError } from 'zod';
 export function validate(schema: ZodSchema): RequestHandler {
   return (req: Request, res: Response, next: NextFunction): void => {
     try {
-      // Build input for validation.
+      // Preserve request namespaces expected by the cart schemas.
       const dataToValidate = {
-        ...req.body,
-        ...req.query,
-        ...req.params,
+        body: req.body,
+        query: req.query,
+        params: req.params,
       };
 
       // Validate against schema
