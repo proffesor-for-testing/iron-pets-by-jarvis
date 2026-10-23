@@ -8,15 +8,15 @@ import { mockCategories, mockProducts } from '@/lib/mock-data';
 export const dynamic = 'force-dynamic';
 
 interface CategoryPageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
-  searchParams: {
+  }>;
+  searchParams: Promise<{
     page?: string;
     minPrice?: string;
     maxPrice?: string;
     sort?: string;
-  };
+  }>;
 }
 
 async function getCategory(slug: string) {
@@ -103,7 +103,8 @@ async function getCategoryProducts(categorySlug: string, filters: Record<string,
   }
 }
 
-export default async function CategoryPage({ params, searchParams }: CategoryPageProps) {
+export default async function CategoryPage({ params: pendingParams, searchParams: pendingSearchParams }: CategoryPageProps) {
+  const [params, searchParams] = await Promise.all([pendingParams, pendingSearchParams]);
   const category = await getCategory(params.slug);
   const page = Number(searchParams.page) || 1;
 
@@ -213,7 +214,8 @@ function ProductGridSkeleton() {
   );
 }
 
-export async function generateMetadata({ params }: CategoryPageProps) {
+export async function generateMetadata({ params: pendingParams }: CategoryPageProps) {
+  const params = await pendingParams;
   const category = await getCategory(params.slug);
 
   return {
