@@ -7,14 +7,14 @@ import { mockProducts } from '@/lib/mock-data';
 export const dynamic = 'force-dynamic';
 
 interface ProductsPageProps {
-  searchParams: {
+  searchParams: Promise<{
     page?: string;
     category?: string;
     minPrice?: string;
     maxPrice?: string;
     petType?: string;
     sort?: string;
-  };
+  }>;
 }
 
 async function getProducts(filters: Record<string, string | number | undefined>, page: number) {
@@ -61,7 +61,8 @@ async function getProducts(filters: Record<string, string | number | undefined>,
   }
 }
 
-export default async function ProductsPage({ searchParams }: ProductsPageProps) {
+export default async function ProductsPage({ searchParams: pendingSearchParams }: ProductsPageProps) {
+  const searchParams = await pendingSearchParams;
   const page = Number(searchParams.page) || 1;
 
   const productsData = await getProducts({

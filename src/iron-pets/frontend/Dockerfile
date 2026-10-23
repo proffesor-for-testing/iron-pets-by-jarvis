@@ -1,5 +1,5 @@
 # Iron Pets Frontend - Production Dockerfile
-FROM node:20-alpine AS base
+FROM node:22.23.4-alpine AS base
 
 # Install dependencies only when needed
 FROM base AS deps
@@ -28,8 +28,8 @@ ENV NEXT_TELEMETRY_DISABLED=1
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Build Next.js application
-RUN npm run build
+# Build Next.js application; public assets are optional in this source tree.
+RUN mkdir -p public && npm run build
 
 # Production stage
 FROM base AS runner

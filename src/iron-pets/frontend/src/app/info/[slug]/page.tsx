@@ -3,7 +3,7 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 
 interface InfoPageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 const infoPages: Record<string, { title: string; content: React.ReactNode }> = {
@@ -380,7 +380,8 @@ const infoPages: Record<string, { title: string; content: React.ReactNode }> = {
   },
 };
 
-export async function generateMetadata({ params }: InfoPageProps): Promise<Metadata> {
+export async function generateMetadata({ params: pendingParams }: InfoPageProps): Promise<Metadata> {
+  const params = await pendingParams;
   const page = infoPages[params.slug];
 
   if (!page) {
@@ -395,7 +396,8 @@ export async function generateMetadata({ params }: InfoPageProps): Promise<Metad
   };
 }
 
-export default function InfoPage({ params }: InfoPageProps) {
+export default async function InfoPage({ params: pendingParams }: InfoPageProps) {
+  const params = await pendingParams;
   const page = infoPages[params.slug];
 
   if (!page) {

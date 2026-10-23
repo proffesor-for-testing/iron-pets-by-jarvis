@@ -12,9 +12,9 @@ import { Product } from '@/types';
 export const dynamic = 'force-dynamic';
 
 interface ProductPageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 async function getProduct(slug: string) {
@@ -57,7 +57,8 @@ function getRelatedProducts(productId: string): Product[] {
   return mockProducts.filter(p => p.id !== productId).slice(0, 4) as unknown as Product[];
 }
 
-export default async function ProductPage({ params }: ProductPageProps) {
+export default async function ProductPage({ params: pendingParams }: ProductPageProps) {
+  const params = await pendingParams;
   const product = await getProduct(params.slug);
   const relatedProducts = getRelatedProducts(product.id);
 
@@ -145,7 +146,8 @@ function ImagesSkeleton() {
   );
 }
 
-export async function generateMetadata({ params }: ProductPageProps) {
+export async function generateMetadata({ params: pendingParams }: ProductPageProps) {
+  const params = await pendingParams;
   const product = await getProduct(params.slug);
 
   return {
